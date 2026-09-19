@@ -1,0 +1,948 @@
+[
+ {
+  "_id": "question.k01",
+  "expectedAnswer": "Quotes the 2024 Developer Policy retention clause ('no longer than necessary' language) and the 2020 wording ('retain data any longer than necessary' bullet), notes there is no fixed number of days in either, and cites both policy versions with their effective dates. Should come from reading the knowledge base entries, not only the rules dataset.",
+  "expectedRules": null,
+  "kind": "standard",
+  "note": "kb-only: the value is in comparing the prose of two versions. (rerun after raising maxOutputTokens from 1400 to 3000; first run ended with finishReason length and empty text)",
+  "situation": {},
+  "text": "What does the current Developer Policy actually say, word for word, about how long we may keep message content, and how does that wording differ from the 2020 version?",
+  "answer": "**Ruling:** The current Developer Policy itself no longer contains a retention-duration clause; that duty now lives in the Developer Terms of Service, and it applies to \"API Data\" generally, not to message content specifically. There is no numeric time limit in either era.\n\n**Why:** The retention duty in force today, effective from 2024-07-08, comes from the Developer Terms of Service, not the Developer Policy document:\n\n> \"you will (1) promptly update the API Data upon request from us or the applicable user, and (2) promptly delete the API Data when: (a) retaining it is no longer necessary for your Application's stated (and approved through App Review, as applicable) functionality that is permitted under the Terms; (b) you stop operating your Application (whether on your own, due to an enforcement action by us, or otherwise); (c) we request you delete it; (d) the applicable user requests you delete it; or (e) required by applicable laws or regulations.\"\n\nSource: [Discord Developer Terms of Service (current, effective July 8, 2024) (Developer Policy)](https://support-dev.discord.com/hc/en-us/articles/8562894815383-Discord-Developer-Terms-of-Service)\n\nBy contrast, the 2020 wording sat directly inside the Developer Policy, as one bullet under \"Handle data with care,\" effective from 2020-07-01:\n\n> \"retain data any longer than necessary for the operation of your application;\"\n\nSource: [2020 Discord Developer Policy (last updated July 1, 2020) (Developer Policy)](https://support-dev.discord.com/hc/en-us/articles/25279999805975-2020-Discord-Developer-Policy)\n\nThe knowledge base's edition-comparison entry confirms the 2022 and 2024 Developer Policy editions carry no separate retention bullet at all; the duty was folded into the Terms starting with the 2022 edition and repeated verbatim in 2024 (rule `retention-no-longer-necessary-2022`, same text, effective 2022-10-01 to 2024-07-07).\n\n**Watch out:** The wording did more than move house. The 2020 standard was \"necessary for the operation of your application,\" a broad, undefined bar. The current standard is \"necessary for your Application's stated (and approved through App Review, as applicable) functionality,\" which ties retention to whatever you disclosed and, for privileged intents, whatever Discord approved, and adds four hard delete triggers (shutdown, Discord's request, the user's request, legal requirement) that the 2020 text never spelled out. Neither version names \"message content\" or gives a day/month/year figure, so any retention window you pick is a defensibility argument, not a citation.\n\n**Counsel notes:** If asked in review why you keep message content for X days, point to your stated functionality, not to a clause that does not exist.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.dataRetention\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority, publishedAt, lastEditedAt}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "data_handling/retention_privacy",
+      "developer_policy/developer_policy_editions"
+     ]
+    }
+   }
+  ],
+  "seconds": 28.6,
+  "error": null
+ },
+ {
+  "_id": "question.k02",
+  "expectedAnswer": "They keep their access for now but must reapply annually; growth is no longer blocked during review; the announcement is undated on the page. Quotes the relevant sentences from the announcement entry and cites it.",
+  "expectedRules": null,
+  "kind": "standard",
+  "note": "kb-only: asks what a specific page says, so the knowledge base entry is the right source.",
+  "situation": {},
+  "text": "What does the 'Changes to Privileged Intent Access for Discord Apps' announcement say happens to apps that were already approved before June 10, 2026?",
+  "answer": "**Ruling:** Apps already approved for privileged intents before June 10, 2026 keep their access for now, but that access is no longer permanent: they must reapply annually, with a 90 day window to resubmit each time they are notified.\n\n**Why:** Per rule `rule.intent-annual-reapply`, effective from 2026-06-10:\n\n> If your app already has Privileged Intent access granted from a prior review, you're good for now, but you will need to reapply annually.\n\nSource: [Getting Started with Privileged Intent Review (developer docs)](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review)\n\nThe support announcement adds the mechanics of that annual cycle: advance notice is sent by email and/or system DM before the reapplication date, then a 90 day window to resubmit, and missing that window removes access (though you can reapply any time). One line from the knowledge base entry on this page: \"When your reapplication date approaches, you will receive advance notice via email and/or system DM, followed by 90 days to resubmit.\"\n\nSource: [Changes to Privileged Intent Access for Discord Apps (developer support)](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps)\n\n**Watch out:** This announcement page itself prints no date (it says \"Today, we're announcing…\"). We date the change to June 10, 2026 based on the change log and the developer docs review guide, both of which carry that explicit date; the announcement's own metadata shows it was created May 6, 2026 and last edited June 11, 2026, so it should not be cited alone for the effective date.\n\n**Counsel notes:** Previously-approved does not mean permanently approved anymore; put the annual reapproval date on a calendar, because Discord will not chase you twice.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "privileged_intents/thresholds_and_policy"
+     ]
+    }
+   }
+  ],
+  "seconds": 25.9,
+  "error": null
+ },
+ {
+  "_id": "question.k03",
+  "expectedAnswer": "Rule 14 (or the numbered rule in the 2025-09-29 Community Guidelines) prohibiting automated user accounts / self-bots, quoted verbatim, with the guidelines effective date and the support article on Automated User Accounts as a second source.",
+  "expectedRules": null,
+  "kind": "standard",
+  "note": "kb-only: wording and rule number live in the guidelines page.",
+  "situation": {},
+  "text": "Give me the exact wording the Community Guidelines use about self-bots and user bots, and which rule number it is.",
+  "answer": "**Ruling:** The exact wording is rule 14 of the Community Guidelines: \"Do not use self-bots or user-bots\" and the accompanying line \"Each account must be associated with a human, not a bot.\"\n\n**Why:** Rule from the dataset, effective from 2025-09-29:\n\n> **14. Do not use self-bots or user-bots.** Each account must be associated with a human, not a bot.\n\nSource: [Discord Community Guidelines (Developer Policy)](https://discord.com/guidelines)\n\n**Watch out:** The knowledge base entry lists the same prohibition under \"Respect Discord\" alongside spam and inauthentic-engagement bans, but does not itself number it as rule 14, that numbering comes only from the rules dataset entry. A separate, older support article echoes the same policy without a rule number:\n\n> Automating normal user accounts (generally called \"self-bots\") outside of the OAuth2/bot API is forbidden, and can result in an account termination if found.\n\nSource: [Automated User Accounts (Self-Bots) (developer support)](https://support.discord.com/hc/en-us/articles/115002192352-Automated-User-Accounts-Self-Bots), effective from 2024-04-05. This support article is lower authority than the Guidelines and does not conflict, it just predates and restates the same rule.\n\n**Counsel notes:** Quote it exactly, rule numbers move if Discord reshuffles the Guidelines, so cite the effective date alongside it.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && !defined(effectiveTo) && (title match \"*self*\" || title match \"*bot*\" || quote match \"*self-bot*\" || quote match \"*self bot*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "authentication",
+      "developer_policy/platform_rules_and_age"
+     ]
+    }
+   }
+  ],
+  "seconds": 24.1,
+  "error": null
+ },
+ {
+  "_id": "question.k04",
+  "expectedAnswer": "Payouts are monthly, eligible after the first $100 (net of fees per the support article), $25 minimum per cycle, and a 45 day window after the end of the month, quoting the support article and noting that the developer docs only mention the $100 figure (contradiction C9).",
+  "expectedRules": null,
+  "kind": "standard",
+  "note": "kb-only: the page context is the answer; the rules dataset has the numbers but not the sequence.",
+  "situation": {},
+  "text": "Walk me through what the Premium Apps payout page says about timing: when payouts run, the minimum, and the 45 day window.",
+  "answer": "**Ruling:** Payouts run on a monthly cycle, paid within 45 days after month end, with a $100 net minimum to trigger the first payout and a $25 net minimum for every cycle after that.\n\n**Why:** The developer support article is the more specific source here and its rule is not superseded.\n\nEffective from 2025-09-19:\n> Eligible payouts will be provided within 45 days after the end of each calendar month. For example, for offerings purchased in January, you will receive payouts within 45 days after January 31st. An eligible payout can be defined as the first $100 earned [less applicable payment processing fees and transaction fees] and for the following billing cycles, in amounts greater than $25.\n\nSource: [Premium Apps Payout (developer support)](https://support-dev.discord.com/hc/en-us/articles/17299902720919-Premium-Apps-Payout)\n\n**Watch out:** The developer docs page states the first threshold more loosely.\n\nEffective from 2026-09-19, inferred:\n> Once your app has made its first $100 it will become eligible for payout.\n\nSource: [Enabling Monetization (developer docs)](https://docs.discord.com/developers/monetization/enabling-monetization)\n\nThis is flagged in the dataset as a contradiction (C9), but the resolution field treats it as a simplification, not a competing rule: the $100 (and the later $25) figures are net of payment processing and transaction fees, not gross. Balances under $25 at payout time roll over to the next cycle rather than being paid out.\n\nOne more thing not in your question but worth flagging: there is also a 90-day window to dispute a payout after the payout date, per the Monetization Terms, separate from the 45-day payment cycle itself.\n\n**Counsel notes:** Budget for the fees to bite before you hit $100, not after; \"net\" is doing a lot of work in that sentence.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.monetisation\" && !defined(effectiveTo) && (title match \"*payout*\" || quote match \"*payout*\" || quote match \"*45*\" || quote match \"*day*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "monetization/fees",
+      "monetization/eligibility"
+     ]
+    }
+   }
+  ],
+  "seconds": 25.6,
+  "error": null
+ },
+ {
+  "_id": "question.q19",
+  "expectedAnswer": "After the first $100 earned net of payment processing and transaction fees; later cycles pay out amounts above $25, within 45 days after the end of the calendar month; balances under $25 roll over. The developer docs say '$100' without the net qualifier; the support article is the more specific one.",
+  "expectedRules": [
+   {
+    "_id": "rule.payout-threshold-100-net-support",
+    "title": "Support: payout eligibility starts at $100 earned net of processing and transaction fees"
+   },
+   {
+    "_id": "rule.payout-45-days-25-min",
+    "title": "Payouts arrive within 45 days after month end; $25 minimum per cycle, smaller balances roll over"
+   },
+   {
+    "_id": "rule.payout-threshold-100-docs",
+    "title": "Docs: you become eligible for payout after your first $100"
+   }
+  ],
+  "kind": "trap",
+  "note": "Obvious answer: '$100 in sales'. The threshold is net of fees.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "When do I get paid?",
+  "answer": "**Ruling:** Depends on your balance so far: you get paid once your app has earned its first $100 net of fees, then within 45 days after the end of each calendar month for amounts above $25.\n\n**Why:** Two sources describe the same payout rule with slightly different precision, flagged as contradiction C9. The developer docs give the simple version, effective from 2026-09-19 (page undated, snapshot 2026-09-19):\n\n> Once your app has made its first $100 it will become eligible for payout.\n\nSource: [Enabling Monetization (developer docs)](https://docs.discord.com/developers/monetization/enabling-monetization)\n\nThe developer support article is more specific, effective from 2025-09-19 (page undated, snapshot 2026-09-19):\n\n> Eligible payouts will be provided within 45 days after the end of each calendar month. For example, for offerings purchased in January, you will receive payouts within 45 days after January 31st. An eligible payout can be defined as the first $100 earned [less applicable payment processing fees and transaction fees] and for the following billing cycles, in amounts greater than $25.\n\nSource: [Premium Apps Payout (developer support)](https://support-dev.discord.com/hc/en-us/articles/17299902720919-Premium-Apps-Payout)\n\nResolution on file: \"The support article is more specific: the $100 is net of payment processing and transaction fees, then $25 minimum per cycle, paid within 45 days after month end. The docs sentence is a simplification of the same rule, not a different rule.\" I applied the support article's net figure since it is the operative detail.\n\n**Watch out:** Under $25 in a cycle rolls over rather than paying out. Payouts also are not automatic: Developer Support runs a compliance review and creates a ticket before enabling payouts, per the same support article. This also assumes your team is already eligible (verified app, team-owned, owner 18+ in US/UK/EU, ToS and Privacy Policy linked, payouts configured via Stripe) — tell me if any of that is not yet in place and I will check it separately.\n\n**Counsel notes:** \"First $100\" sounds simple until fees eat into it, budget accordingly.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.monetisation\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "monetization/fees",
+      "monetization/eligibility"
+     ]
+    }
+   }
+  ],
+  "seconds": 25.4,
+  "error": null
+ },
+ {
+  "_id": "question.q20",
+  "expectedAnswer": "Get verified first (team owner Stripe ID plus the App Verification checklist), then Developer Portal > Discovery > Discovery Status checklist, fill Discovery Settings, enable, and allow up to 24 hours. Content must suit ages 13+, no graphic or sexual content, and respect the Developer Policy and IP rights.",
+  "expectedRules": [
+   {
+    "_id": "rule.discovery-requires-verification",
+    "title": "Discovery (App Directory) requires the team owner to complete identity and app verification"
+   },
+   {
+    "_id": "rule.discovery-24-hours",
+    "title": "After enabling Discovery it can take up to 24 hours to appear"
+   },
+   {
+    "_id": "rule.app-directory-13-plus",
+    "title": "App Directory content must be appropriate for ages 13+"
+   },
+   {
+    "_id": "rule.verification-owner-stripe-id",
+    "title": "To verify, the team owner must verify their identity through Stripe"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "verified": false
+  },
+  "text": "How do I get into the App Directory?",
+  "answer": "**Ruling:** No, not yet. Before your app can appear in the App Directory you must complete Discord's App Verification (Stripe identity check for the team owner), then enable Discovery and meet the listing checklist.\n\n**Why:** Discovery, which is what puts an app in the App Directory and App Launcher, is gated on verification.\n\nEffective from 2026-09-19 (confidence: inferred):\n> To enable **Discovery** for your app, we require your team owner to complete identity and application verification.\n\nSource: [Enabling Discovery (developer docs)](https://docs.discord.com/developers/discovery/enabling-discovery)\n\nThe verification process itself, per the knowledge base, requires:\n- The app must be owned by a Developer Team (not an individual account)\n- The team owner must complete Stripe identity verification\n- All other checklist criteria listed in the Developer Portal's App Verification tab must be met\n\nOnce verified, the App Directory eligibility rules (developer support, \"App Directory Inclusion Guidelines,\" effective from 2025-10-09, confidence: inferred) add a content bar:\n> **3. Do not host graphic or sexual content.** Graphic violence, sexual content, or other age-restricted topics are not allowed in public spaces. Apps opting into discoverability should be appropriate for audiences of all ages 13+.\n\nSource: [App Directory Inclusion Guidelines (developer support)](https://support-dev.discord.com/hc/en-us/articles/8852009977879-App-Directory-Inclusion-Guidelines)\n\nThe App Directory listing knowledge base entry also lists required Discovery Settings fields you must complete before enabling Discovery: Support Server, Application Description, at least 1 tag (up to 5), and an Install URL, plus a public Privacy Policy and Terms of Service and compliance with the ToS, Community Guidelines and Developer Policy.\n\nOnce you enable Discovery, allow time for it to show up:\n> Once you enable **Discovery**, it may take up to 24 hours for your app to appear in the App Directory and App Launcher.\n\nSource: [Enabling Discovery (developer docs)](https://docs.discord.com/developers/discovery/enabling-discovery)\n\n**Watch out:** Verification is not the same review as privileged intents (those are separate since the 2026-06-10 change), so being unverified does not by itself stop you from using intents or growing past any server count. There is an unresolved contradiction in the dataset (id C4) between an old support article claiming \"verification is required for your app to scale past 100 servers\" (dated 2024-08-30, superseded) and the newer separation-of-reviews rule. That does not change the App Directory answer above, but do not assume verification caps your growth, only your Discovery eligibility.\n\n**Counsel notes:** Get the team owner's Stripe ID check done first; everything else in this checklist is paperwork you control.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.appDirectory\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.verification\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "app_directory/listing",
+      "verification/process"
+     ]
+    }
+   }
+  ],
+  "seconds": 33.9,
+  "error": null
+ },
+ {
+  "_id": "question.q21",
+  "expectedAnswer": "Yes, same thing under two names. The API user flag is 1 << 16 VERIFIED_BOT ('Verified Bot'); 1 << 17 VERIFIED_DEVELOPER is the legacy Early Verified Bot Developer badge. The Active Developer Badge is unrelated and has been decommissioned.",
+  "expectedRules": [
+   {
+    "_id": "rule.verified-bot-flag",
+    "title": "'Verified Bot' badge and 'verified app' are the same thing; the API flag is VERIFIED_BOT (1 << 16)"
+   },
+   {
+    "_id": "rule.active-developer-badge-decommissioned",
+    "title": "The Active Developer Badge no longer exists"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Is the 'Verified Bot' badge the same as 'verified app'?",
+  "answer": "**Ruling:** Yes, \"Verified Bot\" badge and \"verified app\" refer to the same thing, the badge is just the visible marker of a verified app's bot user.\n\n**Why:** Rule effective from 2026-09-19 (page undated, snapshot 2026-09-19), confidence inferred:\n\n> `1 << 16` | VERIFIED_BOT | Verified Bot\n\nSource: [User resource (developer docs)](https://docs.discord.com/developers/resources/user)\n\nThe verification process itself, effective from 2026-06-10 onward under the current threshold, is described separately:\n\n> As of June 10, 2026, verification is required when an app reaches 10,000 unique server-installed users. Prior to that date, the threshold was 100 servers — any page still referencing \"100 servers\" or \"scale past 100 servers\" describes the superseded rule.\n\nSource: [Verification Process, Requirements & Age Rules (developer support)](https://support-dev.discord.com/hc/en-us/articles/23926564536471-How-Do-I-Get-My-App-Verified)\n\n**Watch out:** Don't confuse either term with VERIFIED_DEVELOPER (1 << 17), the legacy \"Early Verified Bot Developer\" badge, or with the Active Developer Badge, which was decommissioned on 2025-12-05 and was never related to App Verification at all.\n\n**Counsel notes:** Same concept, two names, one badge; no need to chase a distinction that doesn't exist.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.verification\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "verification/process"
+     ]
+    }
+   }
+  ],
+  "seconds": 23.1,
+  "error": null
+ },
+ {
+  "_id": "question.q22",
+  "expectedAnswer": "100 global CHAT_INPUT, 15 global USER, 15 global MESSAGE and 1 PRIMARY_ENTRY_POINT command, with the same counts per guild for guild commands; 200 command creates per day per guild. Global commands need the applications.commands scope, which the bot scope includes.",
+  "expectedRules": [
+   {
+    "_id": "rule.command-limits",
+    "title": "Command quotas: 100 global chat input, 15 user, 15 message, 1 entry point; same per guild"
+   },
+   {
+    "_id": "rule.command-create-200-per-day",
+    "title": "200 command creates per day per guild"
+   },
+   {
+    "_id": "rule.applications-commands-scope",
+    "title": "Global slash commands need the applications.commands scope, which the bot scope includes"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "How many slash commands can I register, and how fast?",
+  "answer": "**Ruling:** You can register up to 100 global slash (`CHAT_INPUT`) commands, 15 global user commands, 15 global message commands and 1 primary entry point command (same caps apply per guild for guild-scoped commands), and creating them is capped at 200 command creates per day per guild.\n\n**Why:** effective from 2026-09-19 (page undated, snapshot 2026-09-19; confidence inferred)\n\n> * 100 global `CHAT_INPUT` commands\n> * 15 global `USER` commands\n> * 15 global `MESSAGE` commands\n> * 1 global `PRIMARY_ENTRY_POINT` command\n\nSource: [Application Commands (developer docs)](https://docs.discord.com/developers/interactions/application-commands)\n\nAnd on speed:\n\n> There is a global rate limit of 200 application command creates per day, per guild\n\nSource: [Application Commands (developer docs)](https://docs.discord.com/developers/interactions/application-commands)\n\n**Watch out:** Bulk `PUT` overwrites of commands that don't already exist also count toward the 200/day cap, so re-registering your whole command set on every deploy or reconnect can burn through it fast. Register once at startup and only push changes when the command definitions actually change.\n\n**Counsel notes:** Slash commands are cheap to define but expensive to spam-register; treat the daily cap like a budget, not a formality.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.rateLimits\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "commands_interactions/command_definition",
+      "rate_limits"
+     ]
+    }
+   }
+  ],
+  "seconds": 25.0,
+  "error": null
+ },
+ {
+  "_id": "question.q23",
+  "expectedAnswer": "No. Community Guidelines rule 14 (effective September 29, 2025) bans self-bots and user-bots, and the support article says automating a user account outside the OAuth2 and bot API can get the account terminated. Use a bot account.",
+  "expectedRules": [
+   {
+    "_id": "rule.self-bots-banned-guidelines",
+    "title": "Self-bots and user-bots are banned by the Community Guidelines (rule 14)"
+   },
+   {
+    "_id": "rule.self-bots-banned-support",
+    "title": "Support: automating a normal user account outside the OAuth2 and bot API can get the account terminated"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Can I run a 'self-bot' or automate my user account for a private tool?",
+  "answer": "**Ruling:** No, self-bots are banned outright, even for private or personal use, and doing this risks account termination.\n\n**Why:** Community Guidelines rule 14, effective from 2025-09-29, is the highest-authority and current statement of this:\n\n> **14. Do not use self-bots or user-bots.** Each account must be associated with a human, not a bot.\n\nSource: [Discord Community Guidelines (Developer Policy)](https://discord.com/guidelines)\n\nThis is reinforced by the older support article, which spells out the consequence:\n\n> Automating normal user accounts (generally called \"self-bots\") outside of the OAuth2/bot API is forbidden, and can result in an account termination if found.\n\nSource: [Automated User Accounts (Self-Bots) (developer support)](https://support.discord.com/hc/en-us/articles/115002192352-Automated-User-Accounts-Self-Bots)\n\n**Watch out:** There is no \"private tool\" or \"personal use\" exception in either source. The only lawful path to automation is a proper bot account (an Application with a bot user) authorized through the OAuth2/bot API, even if you never list it publicly or invite it to more than one server.\n\n**Counsel notes:** Register a bot application instead. It costs nothing and keeps your main account off the chopping block.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.tokensAndSecurity\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "authentication"
+     ]
+    }
+   }
+  ],
+  "seconds": 21.9,
+  "error": null
+ },
+ {
+  "_id": "question.q24",
+  "expectedAnswer": "Baseline: usernames, avatars, banners, nicknames (the article also lists discriminators, which no longer exist), roles, message metadata such as time sent, voice channel joins and voice state, reactions, and members' language. Content fields are empty without Message Content except for the documented exceptions; join and leave events need Guild Members; status needs Presence.",
+  "expectedRules": [
+   {
+    "_id": "rule.baseline-data-without-intents",
+    "title": "What a bot sees with zero privileged intents: profiles, roles, message metadata, voice state, reactions, locale"
+   },
+   {
+    "_id": "rule.message-content-exceptions-gateway",
+    "title": "Without the intent you still get content for: your own messages, DMs, mentions, and context menu targets"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": []
+  },
+  "text": "What data does my bot get from a server with zero privileged intents?",
+  "answer": "**Ruling:** With no privileged intents enabled, your bot still gets a fixed baseline of data from every server it is in, plus message content in a handful of exempt cases; everything else (member lists, presence, and message content in ordinary messages) comes back empty or is withheld.\n\n**Why:** This baseline is separate from the intents system entirely.\n\nEffective from page undated, snapshot 2026-09-19 (developer support article, no dated policy version cited):\n> Basic user profile information of server members (usernames, avatars, banners, discriminators, nicknames); Roles that members have in the server; Metadata about messages (day and time sent); The voice channel members join, plus voice metadata (muted, deafened, streaming, video on); Message reactions by members; Language/locale selected by members in their User Settings\n\nSource: [Bot Data Access & API Objects (developer support)](https://support-dev.discord.com/hc/en-us/articles)\n\nOn top of that baseline, without the Message Content intent specifically, content fields are empty except in defined exceptions:\n\nEffective from 2026-06-10 (the newer guide; an older 2022 change log and the gateway docs page each list a narrower or slightly different set, all three are shown as conflicting in the ruling below):\n> The Message Content intent is **not** needed for your app to access message content in these situations:\n>\n> * **Messages your app sends**\n> * **Direct Messages sent to your app**\n> * **Messages that @mention your app**\n> * **Replies to your app's messages.** Note: this applies to replies sent using Discord's reply feature to a regular bot message (not an interaction response) and the user has \"ping on reply\" enabled. It does not apply to replies to slash command responses.\n\nSource: [You Might Not Need a Privileged Intent (developer docs)](https://docs.discord.com/developers/gateway/you-might-not-need-a-privileged-intent)\n\n**Watch out:** Three official pages give different lists of Message Content exceptions (the 2022 change log lists only three: own messages, DMs, mentions; the current Gateway docs page adds the target message of a message context menu command but omits replies; the June 2026 guide adds the reply/ping-on-reply exception but omits context menu targets). The dataset resolves this as a union of all of them rather than picking one page as authoritative, since each is incomplete rather than wrong. Without Guild Members or Guild Presences intents, you get no real-time member/presence events and no full member list, but you can still use Get Guild Member, Search Guild Members, Get User, and interaction-provided member data as approved alternatives.\n\n**Counsel notes:** If your bot only needs data on demand from users who interact with it, you probably don't need any privileged intent at all, and enabling one \"just in case\" is itself flagged as a Developer Policy problem, not just an unnecessary risk.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "permissions/data_access_visibility",
+      "privileged_intents/intent_types_and_alternatives"
+     ]
+    }
+   }
+  ],
+  "seconds": 32.1,
+  "error": null
+ },
+ {
+  "_id": "question.q25",
+  "expectedAnswer": "Today: Developer Policy and Developer Terms effective July 8, 2024 (last updated June 6, 2024), arbitration opt out within 30 days of that date or of your first Application. October 1, 2022 to July 7, 2024: the 2022 versions. August 18, 2020 (Terms) and July 1, 2020 (Policy) to September 30, 2022: the 2020 versions. Before that the 2017 Developer Terms (effective August 20, 2017). Discord's Terms, Privacy Policy and Guidelines: effective September 29, 2025.",
+  "expectedRules": [
+   {
+    "_id": "rule.dev-policy-version-2024",
+    "title": "Current Developer Policy: effective July 8, 2024, last updated June 6, 2024"
+   },
+   {
+    "_id": "rule.dev-policy-version-2022",
+    "title": "2022 Developer Policy: effective October 1, 2022, last updated September 1, 2022"
+   },
+   {
+    "_id": "rule.dev-tos-version-2024",
+    "title": "Current Developer Terms of Service: effective July 8, 2024, last updated June 6, 2024"
+   },
+   {
+    "_id": "rule.dev-tos-version-2022",
+    "title": "2022 Developer Terms of Service: effective October 1, 2022"
+   },
+   {
+    "_id": "rule.dev-tos-version-2020",
+    "title": "2020 Developer Terms of Service: effective August 18, 2020"
+   },
+   {
+    "_id": "rule.dev-tos-version-2017",
+    "title": "2017 Developer Terms of Service: effective August 20, 2017"
+   },
+   {
+    "_id": "rule.arbitration-opt-out",
+    "title": "Arbitration opt out: within 30 days of July 8, 2024 or of creating your first Application"
+   },
+   {
+    "_id": "rule.age-13-platform",
+    "title": "You must be at least 13 (or your country's minimum) to use Discord at all"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Which version of the Developer Policy applies to me and when did it change?",
+  "answer": "**Ruling:** The Developer Policy in force today is the 2024 edition, effective July 8, 2024, and it replaced the 2022 edition that ran from October 1, 2022 to July 7, 2024.\n\n**Why:** Rule effective from 2024-07-08:\n\n> Effective date: July 8, 2024\n>\n> Last updated: June 6, 2024\n\nSource: [Discord Developer Policy (current, effective July 8, 2024) (Developer Policy)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\nThe version it replaced, effective October 1, 2022 to July 7, 2024:\n\n> *Effective: October 1, 2022*\n>\n> *Last Updated: September 1, 2022*\n\nSource: [2022 Discord Developer Policy (effective October 1, 2022) (Developer Policy)](https://support-dev.discord.com/hc/en-us/articles/25280499088279-2022-Discord-Developer-Policy)\n\n**Watch out:** The 2024 edition added two things worth knowing if they touch your app: a ban on using message content obtained through the APIs to train ML/AI models without Discord's express permission (new Rule 21), and, effective October 7, 2024, a requirement that paid features supported by Discord's Premium Apps products be priced on Discord no higher than elsewhere. Neither existed in the 2022 text.\n\n**Counsel notes:** If your app predates July 2024, don't assume the 2022 rules still cover you, they don't, only the current text binds you now.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.dataRetention\" ] {_id} | order(_id)"
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (_id == \"rule.dev-policy-version-2022\" || _id == \"rule.dev-policy-version-2024\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority, publishedAt, lastEditedAt}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "developer_policy/developer_policy_editions"
+     ]
+    }
+   }
+  ],
+  "seconds": 28.0,
+  "error": null
+ },
+ {
+  "_id": "question.q26",
+  "expectedAnswer": "Because there is no space after the hashes. Discord only renders a header when the line starts with #, ## or ### followed by a space ('## Rules', not '##Rules'), and the hashes must be the first characters on the line. Same rule for -# subtext, > block quotes and - list bullets. Source: Markdown Text 101 (user support, edited 2025-04-23).",
+  "expectedRules": [
+   {
+    "_id": "rule.md-header-space",
+    "title": "Headers need a space after #, ## or ### at the start of the line"
+   },
+   {
+    "_id": "rule.md-subtext",
+    "title": "Subtext is -# at the very start of the line, followed by a space"
+   }
+  ],
+  "kind": "standard",
+  "note": "Formatting area. The answer is one missing space.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "My ## header shows as literal text in the message. Why?",
+  "answer": "**Ruling:** Your header is missing the required space after the hashes, so Discord renders it as plain text instead of a heading.\n\n**Why:** Headers require `#`, `##` or `###` at the start of a line followed by a space, effective from 2025-04-23.\n\n> **Note:** Don't forget to add a space between the leading heading character (`#`, `##`, `###`) and your text!\n>\n> To create a header you just need to include a specific number of the hash/pound sign character (`#`). Use (`#`) for a big header, (`##`) for a smaller header, or (`###`) for an even smaller header as the first character(s) in a new line to make a header.\n\nSource: [Markdown Text 101 (Chat Formatting: Bold, Italic, Underline) (developer support)](https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline)\n\nChange `##Header` to `## Header`.\n\n**Watch out:** the hashes must also be the very first characters on the line. If anything precedes them, even a space used for indentation, the line stays literal text too.\n\n**Counsel notes:** One missing character, one very literal client.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\" && (title match \"*header*\" || quote match \"*#*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, confidence, contradictionId, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "message_formatting"
+     ]
+    }
+   }
+  ],
+  "seconds": 23.9,
+  "error": null
+ },
+ {
+  "_id": "question.q27",
+  "expectedAnswer": "Description: 4096 characters. Per embed: title 256, up to 25 fields with name 256 and value 1024, footer 2048, author name 256. Across all embeds on one message the sum of those text fields must not exceed 6000 characters, and a message carries at most 10 embeds; break either and the API returns 400 Bad Request. Limits are inclusive and whitespace is trimmed first. Source: Message resource, Embed Limits (developer docs, undated, snapshot 2026-09-19).",
+  "expectedRules": [
+   {
+    "_id": "rule.embed-field-limits",
+    "title": "Embed limits: title 256, description 4096, 25 fields, field name 256, field value 1024, footer 2048, author 256"
+   },
+   {
+    "_id": "rule.embed-total-6000",
+    "title": "Embed limits: 6000 characters combined across all embeds, or 400 Bad Request"
+   },
+   {
+    "_id": "rule.api-10-embeds-6000",
+    "title": "Bot API: up to 10 rich embeds per message, 6000 characters across them"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "What is the maximum number of characters in an embed description, and in the whole embed?",
+  "answer": "**Ruling:** Description caps at 4096 characters, and the total across title, description, field names, field values, footer text and author name for the whole embed caps at 6000 characters.\n\n**Why:** From the Message resource, effective from 2026-09-19 (page undated, snapshot 2026-09-19, confidence inferred):\n\n> | title | 256 characters |\n> | description | 4096 characters |\n> | fields | Up to 25 field objects |\n> | field.name | 256 characters |\n> | field.value | 1024 characters |\n> | footer.text | 2048 characters |\n> | author.name | 256 characters |\n\nSource: [Message resource (developer docs)](https://docs.discord.com/developers/resources/message)\n\nAnd on the combined cap, same source and date:\n\n> Additionally, the combined sum of characters in all `title`, `description`, `field.name`, `field.value`, `footer.text`, and `author.name` fields across all embeds attached to a message must not exceed 6000 characters. Violating any of these constraints will result in a `Bad Request` response.\n\nSource: [Message resource (developer docs)](https://docs.discord.com/developers/resources/message)\n\n**Watch out:** The 6000-character combined limit is per message across all embeds attached to it, not per single embed. A message can also hold up to 10 rich embeds, and that same 6000-character total applies across all of them together, so a description alone can use the full 4096 but leaves only 1904 for everything else on the message.\n\n**Counsel notes:** Build embeds with a running character counter, not by eyeballing, since a Bad Request at send time is a bad way to find out you went over.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "message_formatting"
+     ]
+    }
+   }
+  ],
+  "seconds": 23.1,
+  "error": null
+ },
+ {
+  "_id": "question.q28",
+  "expectedAnswer": "No. The documented rule is only 1 to 100 characters (Channels resource), but text channel names are lowercased and spaces become hyphens; no Discord page states that, the only written record is GitHub issue 1646 (2020), so say 'inferred'. Emoji and Unicode symbols are accepted and count toward the 100. Voice channels and categories keep capitals and spaces.",
+  "expectedRules": [
+   {
+    "_id": "rule.channel-name-1-100",
+    "title": "Channel names are 1 to 100 characters"
+   },
+   {
+    "_id": "rule.text-channel-lowercase-no-spaces",
+    "title": "Text channel names: no capital letters or spaces, most Unicode allowed (undocumented, GitHub record only)"
+   }
+  ],
+  "kind": "standard",
+  "note": "The agent must flag that the lowercase rule is undocumented.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Can a text channel name have spaces or capital letters?",
+  "answer": "**Ruling:** No, a text channel name cannot have capital letters or spaces; it is forced to lowercase with hyphens.\n\n**Why:** rule `rule.text-channel-lowercase-no-spaces`, page undated, snapshot 2026-09-19, confidence inferred.\n\n> Discord has already permitted most of Unicode to be used in text channel names, so it seems quite arbitrary that capital letters and spaces are still banned.\n\nSource: [GitHub issue 1646: Allow capital letters and spaces in text channel names (GitHub)](https://github.com/discord/discord-api-docs/issues/1646)\n\nThis is not stated on any official developer docs or policy page. The developer docs only give a length rule:\n\n> the name of the channel (1-100 characters)\n\nSource: [Channels resource (developer docs)](https://docs.discord.com/developers/resources/channel)\n\n**Watch out:** This behavior (no caps, no spaces) is undocumented by Discord itself. Our only written record is a 2020 GitHub feature request that Discord closed as general product feedback, not as an API bug, so treat it as confirmed product behavior rather than a formal rule. It also does not apply to voice channel or category names, which do keep capitals.\n\n**Counsel notes:** Discord will happily rename your `Welcome Room` channel to `welcome-room` for you, so just name it that way to start.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "message_formatting"
+     ]
+    }
+   }
+  ],
+  "seconds": 22.0,
+  "error": null
+ },
+ {
+  "_id": "question.q29",
+  "expectedAnswer": "500 channels in total, counting text, voice and categories (error 30013 and the support caps table); at most 50 channels inside one category (Channels resource); 50 categories per server per the caps table, although the docs error code 30030 says 5 with no explanation (contradiction C11). Plan for 50 categories and cite both.",
+  "expectedRules": [
+   {
+    "_id": "rule.max-500-channels-docs",
+    "title": "Error 30013: a server can have at most 500 channels"
+   },
+   {
+    "_id": "rule.category-50-channels-docs",
+    "title": "A category holds at most 50 channels"
+   },
+   {
+    "_id": "rule.caps-categories-50",
+    "title": "Caps table: 50 categories per server, 500 channels including categories, 50 channels per category"
+   },
+   {
+    "_id": "rule.error-30030-categories-5",
+    "title": "Error 30030 says the category maximum is 5, which contradicts the support caps table"
+   }
+  ],
+  "kind": "standard",
+  "note": "Contradiction C11 must be surfaced.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "How many channels and categories can my server have?",
+  "answer": "**Ruling:** Your server can have up to 500 channels in total (text, voice and categories combined), with a maximum of 50 categories and up to 50 channels inside any one category.\n\n**Why:** The support caps table, effective from 2026-03-02:\n\n> | Server categories | 50 | Same | Same | Same |\n\nSource: [Discord Account Caps, Server Caps, and More (user support)](https://support.discord.com/hc/en-us/articles/33694251638295-Discord-Account-Caps-Server-Caps-and-More)\n\nThe developer docs confirm the 500-channel ceiling separately, effective from 2026-09-19:\n\n> Maximum number of guild channels reached (500)\n\nSource: [Opcodes and Status Codes (developer docs)](https://docs.discord.com/developers/topics/opcodes-and-status-codes)\n\nAnd a category itself tops out at 50 channels, per the docs:\n\n> an organizational category that contains up to 50 channels\n\nSource: [Channels resource (developer docs)](https://docs.discord.com/developers/resources/channel)\n\n**Watch out:** There is a genuine conflict on the category count. The same docs error table also lists code 30030 as:\n\n> Maximum number of server categories has been reached (5)\n\nSource: [Opcodes and Status Codes (developer docs)](https://docs.discord.com/developers/topics/opcodes-and-status-codes)\n\nThat \"5\" is a bare number with no explanation, while the support caps article (edited 2026-03-02) explicitly states 50 categories and 500 total channels. The dataset's resolution treats the docs line as unreliable and rules for 50 categories, but flags that 30030 is the error code you would actually see if a category create is rejected.\n\n**Counsel notes:** Design your channel list around 50 categories and 500 channels total, but do not be surprised if a create call throws 30030 well before that.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "message_formatting"
+     ]
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type==\"rule\" && contradictionId==\"C11\"]{_id,title,resolution}"
+    }
+   }
+  ],
+  "seconds": 27.6,
+  "error": null
+ },
+ {
+  "_id": "question.q30",
+  "expectedAnswer": "The bot API caps content at 2000 characters (Create Message params). The 4000 limit is a Nitro user perk in the client and does not apply to apps. Split the text, put up to 4096 characters in an embed description, or attach a file.",
+  "expectedRules": [
+   {
+    "_id": "rule.api-content-2000",
+    "title": "Bot API: message content is up to 2000 characters"
+   },
+   {
+    "_id": "rule.message-4000-nitro",
+    "title": "Nitro raises the user message cap to 4000 characters"
+   },
+   {
+    "_id": "rule.embed-field-limits",
+    "title": "Embed limits: title 256, description 4096, 25 fields, field name 256, field value 1024, footer 2048, author 256"
+   }
+  ],
+  "kind": "standard",
+  "note": "Nitro is a user perk, not an API change.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "My bot sends a 3000 character message and gets a 400. A user says Nitro allows 4000, so why not for my bot?",
+  "answer": "**Ruling:** No, the 4000 character allowance is a Nitro perk for human users in the client, the bot API's `content` field is capped at 2000 characters regardless of anyone's Nitro status, so your 3000 character send gets rejected with a 400.\n\n**Why:** The developer docs set the API limit, effective from 2026-09-19 (page undated, snapshot 2026-09-19, confidence inferred):\n\n> Message contents (up to 2000 characters)\n\nSource: [Message resource (developer docs)](https://docs.discord.com/developers/resources/message)\n\nThe Nitro figure your user is quoting is a separate, client-side rule for human accounts:\n\n> You can raise the character cap limit to **4000** when you subscribe to Discord Nitro.\n\nSource: [Sending Messages (user support)](https://support.discord.com/hc/en-us/articles/360034632292-Sending-Messages)\n\n**Watch out:** Nitro changes what a human can type into the box in the client. It does not touch the `content` field limit your bot posts through via the API. There is no bot-side Nitro exception, verified or not, boosted server or not.\n\n**Counsel notes:** Split the 3000 characters across two messages, or move the overflow into an embed description (up to 4096 characters) instead of fighting the content field.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\" && !defined(effectiveTo) && (title match \"*character*\" || title match \"*limit*\" || title match \"*Nitro*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "message_formatting"
+     ]
+    }
+   }
+  ],
+  "seconds": 23.4,
+  "error": null
+ },
+ {
+  "_id": "question.q31",
+  "expectedAnswer": "Use <t:UNIX_SECONDS:R> for relative ('in 2 hours'), or another style letter: t, T, d, D, f (default), F, s, S. The number must be Unix seconds, not milliseconds. Source: API Reference, Message Formatting (developer docs, undated, snapshot 2026-09-19).",
+  "expectedRules": [
+   {
+    "_id": "rule.fmt-timestamps",
+    "title": "Timestamps: <t:UNIX> or <t:UNIX:STYLE>, in seconds, shown in each viewer's timezone"
+   },
+   {
+    "_id": "rule.fmt-timestamp-styles",
+    "title": "Timestamp styles: t, T, d, D, f (default), F, s, S, R (relative)"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "How do I show a time that renders in each reader's own timezone, like 'in 2 hours'?",
+  "answer": "**Ruling:** Use the timestamp markdown tag `<t:UNIX_TIMESTAMP:R>`, where `UNIX_TIMESTAMP` is Unix time in seconds; Discord renders it in each reader's own timezone and locale, and the `R` style shows it as relative (\"in 2 hours\").\n\n**Why:** Rule \"Timestamps: <t:UNIX> or <t:UNIX:STYLE>, in seconds, shown in each viewer's timezone\" (page undated, snapshot 2026-09-19, confidence inferred):\n\n> Timestamps are expressed in **seconds** and display the given timestamp in the user's timezone and locale.\n\nFor the relative style specifically, the styles table (also page undated, snapshot 2026-09-19, confidence inferred):\n\n> | R | 4 years ago | Relative Time |\n\nSource: [API Reference (developer docs)](https://docs.discord.com/developers/reference)\n\nExample: for a moment 2 hours from now, compute its Unix seconds value (say `1758312000`) and write `<t:1758312000:R>`.\n\n**Watch out:** The number must be seconds, not milliseconds, and unix time not local time, or the rendered time will be wrong by orders of magnitude.\n\n**Counsel notes:** Both rules here are marked inferred and the source page carries no explicit date, so I'm citing snapshot date rather than an effective date.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\" && !defined(effectiveTo) && (title match \"*timestamp*\" || quote match \"*timestamp*\" || quote match \"*<t:*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "message_formatting"
+     ]
+    }
+   }
+  ],
+  "seconds": 24.0,
+  "error": null
+ },
+ {
+  "_id": "question.q32",
+  "expectedAnswer": "A message in a ```md code block such as:\n# Welcome to the server\n-# Read this once, it takes a minute.\n\n**Rules**\n- Be kind, no harassment.\n- No spam or self promotion.\n- Keep NSFW out of every channel.\n\n> Questions go to <#CHANNEL_ID>.\n\n||The mods are watching, but they are friendly.||\n\nfollowed by one line per rule applied with its source link (header needs a space, -# subtext, - list bullets, > block quote, ||spoiler||) and a character count against the 2000 limit (4000 only for Nitro users, never for bots).",
+  "expectedRules": [
+   {
+    "_id": "rule.md-header-space",
+    "title": "Headers need a space after #, ## or ### at the start of the line"
+   },
+   {
+    "_id": "rule.md-subtext",
+    "title": "Subtext is -# at the very start of the line, followed by a space"
+   },
+   {
+    "_id": "rule.md-lists",
+    "title": "Bulleted lists: - or * at the start of each line, then a space"
+   },
+   {
+    "_id": "rule.md-block-quote",
+    "title": "Block quote: > plus a space at the start of the line"
+   },
+   {
+    "_id": "rule.md-spoiler",
+    "title": "Spoilers are ||text||, and a code block cancels them"
+   },
+   {
+    "_id": "rule.api-content-2000",
+    "title": "Bot API: message content is up to 2000 characters"
+   }
+  ],
+  "kind": "standard",
+  "note": "Draft request. Graded on correct syntax in a copyable code block, rule citations and a character count.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Write a welcome message for my server with a header, a rules list and a spoiler.",
+  "answer": "```md\n# 👋 Welcome to the Server!\n\nGlad to have you here. Before you jump in, please read the rules below.\n\n## Server Rules\n- Be respectful to all members, no harassment or hate speech\n- No spam or self-promotion outside designated channels\n- Keep content appropriate, no NSFW material\n- Follow Discord's Terms of Service and Community Guidelines\n- Listen to staff and moderators\n\n|| Psst... say hi in #introductions to unlock the fun channels! ||\n```\n\nLength: 393 characters",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\"]{_id, title, plainAnswer, quote, effectiveFrom, confidence, contradictionId, \"source\": source->{title, kind, authority, url}}"
+    }
+   }
+  ],
+  "seconds": 19.0,
+  "error": null
+ },
+ {
+  "_id": "question.q33",
+  "expectedAnswer": "A channel list in a ```md code block using the community convention emoji + separator + lowercase name, for example 👋┆welcome, 📜┆rules, 📢┆announcements, 🔴┆live-streams, 💬┆general-chat, 📈┆trading, 😂┆memes, under category headers in caps (INFO, COMMUNITY). It must state the Discord constraints it respected: 1 to 100 characters (Channels resource), text channel names lowercase with hyphens and no spaces (undocumented, GitHub 1646, inferred), 50 channels per category and 500 per server, and mark the emoji and separator choice as community convention, not a Discord rule.",
+  "expectedRules": [
+   {
+    "_id": "rule.channel-name-1-100",
+    "title": "Channel names are 1 to 100 characters"
+   },
+   {
+    "_id": "rule.text-channel-lowercase-no-spaces",
+    "title": "Text channel names: no capital letters or spaces, most Unicode allowed (undocumented, GitHub record only)"
+   },
+   {
+    "_id": "rule.convention-emoji-separator-name",
+    "title": "Community convention: emoji + separator + lowercase name, for example 👋┆welcome"
+   },
+   {
+    "_id": "rule.convention-separators",
+    "title": "Community convention: common separators are ┆ ・ │ ︱ ⋆ ✦ (also ┃ and 〢)"
+   },
+   {
+    "_id": "rule.convention-channel-emojis",
+    "title": "Community convention: common channel emoji are 💬 📢 📜 🔊 👋 📸 🚨 🎮 📝 🤖"
+   },
+   {
+    "_id": "rule.category-50-channels-docs",
+    "title": "A category holds at most 50 channels"
+   }
+  ],
+  "kind": "standard",
+  "note": "Draft request. The answer must separate Discord rules from taste.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Give me channel names for a crypto community server: welcome, rules, announcements, live streams, general chat, trading, memes",
+  "answer": "Based on the formatting rules, here is the channel list.\n\n```md\nWELCOME\n👋┆welcome\n📜┆rules\n📢┆announcements\n\nCHAT\n💬┆general-chat\n😂┆memes\n\nTRADING\n📈┆trading\n\nVOICE\n🔴・live-streams\n```\n\nLength: 129 characters",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.formatting\"]{_id, title, plainAnswer, quote, effectiveFrom, confidence, contradictionId, \"source\": source->{title, kind, authority, url}}"
+    }
+   }
+  ],
+  "seconds": 18.0,
+  "error": null
+ },
+ {
+  "_id": "question.u01",
+  "expectedAnswer": "Unknown. No current source states a server cap for unverified apps. The one page that says verification is required to scale past 100 servers was last edited in August 2024, before the June 2026 change that decoupled verification from intents and unblocked growth during review. The agent should say it cannot determine this and recommend asking Discord developer support, citing both pages.",
+  "expectedRules": [
+   {
+    "_id": "rule.verification-required-past-100-servers",
+    "title": "Support article still says verification is required to scale past 100 servers"
+   },
+   {
+    "_id": "rule.growth-not-blocked-during-review",
+    "title": "Hitting the threshold no longer blocks your app from joining new servers"
+   }
+  ],
+  "kind": "unknown",
+  "note": "The correct behaviour is to admit the gap, not to pick a side.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "servers": 99,
+   "verified": false
+  },
+  "text": "Does an unverified bot still stop at 100 servers?",
+  "answer": "**Ruling:** No confirmed cap exists any more, but Discord has not explicitly retracted the old \"100 servers\" rule either, so this is unresolved and worth confirming with Discord support before you rely on it.\n\n**Why:** Two sources disagree (contradictionId C4).\n\nOld rule, `effective from 2024-08-30`, still undated as \"current\" by its own page but pre-dates the June 2026 overhaul:\n> Verification is required for your app to scale past 100 servers.\n\nSource: [How Do I Get My App Verified? (developer support)](https://support-dev.discord.com/hc/en-us/articles/23926564536471-How-Do-I-Get-My-App-Verified)\n\nNewer rule, `effective from 2026-06-10`:\n> Previously, when an app hit 100 servers and was required to apply for continued access to its Privileged Intents, it was blocked from joining new servers until the review was complete. That's no longer the case. Under the new user-based threshold, apps can continue joining servers and reaching new users while their submission is under review.\n\nSource: [Changes to Privileged Intent Access for Discord Apps (developer support)](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps)\n\nA companion rule from the same June 2026 change confirms verification and privileged-intent review are now separate processes entirely:\n> Previously, App Verification and Privileged Intent review were part of the same review process. With this change, we have separated App Verification and the Privileged Intent review process.\n\nSource: [Changes to Privileged Intent Access for Discord Apps (developer support)](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps)\n\nThe dataset's own resolution note for this conflict: \"Unresolved. The June 10, 2026 announcement says growth is no longer blocked during intent review and that verification is a separate process, and the Discovery docs describe verification only as the prerequisite for Discovery and monetisation. But no current page retracts the 100 server cap for unverified apps either; the only page that states it was last edited 2024-08-30. Our ruling: cite both, say no current source states a cap, and recommend asking developer support.\"\n\n**Watch out:** You are at 99 servers today, one away from the old trigger point. The June 2026 change clearly removed the *intent-review* block on joining new servers, but it never says in plain words \"unverified apps may exceed 100 servers.\" Nothing in the current docs frames verification as a growth gate any more, it frames it as the gate to Discovery and monetisation instead.\n\n**Counsel notes:** Ask Discord developer support directly before you plan around crossing 100 servers unverified. Don't bet the roadmap on a support article's silence.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.verification\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "verification/process",
+      "privileged_intents/thresholds_and_policy"
+     ]
+    }
+   }
+  ],
+  "seconds": 32.6,
+  "error": null
+ },
+ {
+  "_id": "question.u02",
+  "expectedAnswer": "Unknown. Article 4404772028055 (Message Content Privileged Intent FAQ) was deleted and now redirects to 'What are Privileged Intents?', which says nothing about storage. The Wayback copy was not captured. The agent should say the source no longer exists and fall back to the Developer Terms retention duty (delete when no longer necessary).",
+  "expectedRules": [
+   {
+    "_id": "rule.retention-no-longer-necessary-2024",
+    "title": "How long can I keep API data? Only as long as necessary for your stated functionality; no fixed number"
+   }
+  ],
+  "kind": "unknown",
+  "note": "The agent must not invent FAQ wording.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ]
+  },
+  "text": "What exactly did the Message Content Intent FAQ say about storing message content?",
+  "answer": "No rule or source in the dataset is titled or framed as a \"Message Content Intent FAQ.\" There is no such page in the knowledge base either; the closest sources are the Developer Policy's data-use clause and the developer docs on the gateway/\"you might not need a privileged intent\" guide, neither of which is called an FAQ.\n\n**Ruling:** There is no \"Message Content Intent FAQ\" in the sources available to me, so I cannot quote what it says; the closest rule on storing message content comes from the Developer Policy's general data-use clause.\n\n**Why:** Storage of message content (or any API data) is governed by the Developer Policy's purpose-limitation clause, effective from 2024-07-08:\n\n> You may not request, access, or use API Data for any purpose other than as necessary to provide your Application's stated (and approved through App Review, as applicable) functionality; provided that you may also use API Data for the purpose of improving your Application only if it has been aggregated or de-identified such that it cannot be associated with, or used to identify, any individual.\n\nSource: [Discord Developer Policy (current, effective July 8, 2024) (Developer Policy)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\nThere is also a flat ban specific to message content, effective from 2024-07-08:\n\n> 21. Do not use message content obtained through the APIs to train machine learning or AI models (including large language models) unless express permission is granted by Discord.\n\nSource: [Discord Developer Policy (current, effective July 8, 2024) (Developer Policy)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\n**Watch out:** If you have a specific page in mind titled \"Message Content Intent FAQ,\" it is not in my dataset or knowledge base under that name. It may be an older or unofficial page. Tell me the URL or where you saw it and I will check it against what I have.\n\n**Counsel notes:** Ask me about the FAQ by name only if you can point me to it; otherwise the policy clause above is what actually governs storage.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && !defined(effectiveTo) && (area._ref == \"area.dataRetention\" || area._ref == \"area.intents\") && (title match \"*message content*\" || quote match \"*message content*\" || title match \"*storing*\" || quote match \"*store*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, authority}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "privileged_intents/intent_types_and_alternatives",
+      "data_handling/retention_privacy"
+     ]
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && !defined(effectiveTo) && (quote match \"*FAQ*\" || title match \"*FAQ*\" || source->title match \"*FAQ*\" || source->title match \"*Message Content*\")]{_id, title, plainAnswer, quote, effectiveFrom, confidence, \"source\": source->{title, kind, url}}"
+    }
+   }
+  ],
+  "seconds": 31.4,
+  "error": null
+ },
+ {
+  "_id": "question.u03",
+  "expectedAnswer": "Best answer: June 10, 2026, from the change log and the review guide. But the announcement page itself is undated (it says 'today'), its metadata says created May 6, 2026 and edited June 11, 2026. The agent should give June 10, 2026 with the caveat that the primary source carries no date.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-change-date-changelog",
+    "title": "The intent change is dated June 10, 2026 in the change log"
+   },
+   {
+    "_id": "rule.intent-change-date-guide",
+    "title": "The review guide says the changes took effect as of June 10th, 2026"
+   },
+   {
+    "_id": "rule.intent-change-date-announcement-undated",
+    "title": "The announcement says 'today' but carries no date"
+   }
+  ],
+  "kind": "unknown",
+  "note": "Partial knowledge: a defensible date with an explicit caveat, not a confident single answer.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "What is the exact date the 10,000-user rule started?",
+  "answer": "**Ruling:** The 10,000-unique-user threshold for privileged intent review took effect on June 10, 2026.\n\n**Why:** This is confirmed by the developer docs, effective from 2026-06-10.\n\n> When an app has more than 10,000 unique users who can see your app across all the servers it's in, it requires review for continued access to Privileged Intents. Once you hit this threshold, the app or team owner will receive a system DM and/or an email.\n\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\nThe change log and the review guide independently confirm the same date:\n\n> As of June 10th, 2026, we've made some changes to the Privileged Intents review process.\n\nSource: [Getting Started with Privileged Intent Review (developer docs)](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review)\n\n**Watch out:** The original announcement article itself carries no date in its own text (it just says \"Today, we're announcing changes...\"), so it cannot be cited alone for the date; its page metadata shows created May 6, 2026 and last edited June 11, 2026. Also note the Application flags table still says intents are required at 100 or more servers, that page is stale and superseded by the June 10, 2026 change.\n\n**Counsel notes:** Three independent sources land on June 10, 2026, so treat that date as solid, not inferred.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\" && !defined(effectiveTo)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, confidence, contradictionId, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "privileged_intents/thresholds_and_policy"
+     ]
+    }
+   }
+  ],
+  "seconds": 22.0,
+  "error": null
+ }
+]

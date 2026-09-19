@@ -1,0 +1,10 @@
+{
+ "base": "https://bot-lawyer.vercel.app",
+ "question": "Do I need a privacy policy for a bot in one private server?",
+ "asOf": null,
+ "status": 200,
+ "seconds": 1.7,
+ "tools": [],
+ "error": "An error occurred.",
+ "answer": ""
+}

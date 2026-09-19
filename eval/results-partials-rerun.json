@@ -1,0 +1,231 @@
+[
+ {
+  "_id": "question.q01",
+  "expectedAnswer": "Server count is irrelevant since June 10, 2026. With about 4,000 users you are under the 10,000 user threshold: toggle Message Content on in Developer Portal > Bot > Privileged Gateway Intents, no application, no verification. At 10,000 users you get a notification and 90 days to apply. Before June 10, 2026 the answer was yes (100+ servers required application and verification). The application flags table that still says 100 or more servers is stale.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-threshold-10k-users",
+    "title": "Privileged intents need review at 10,000 users, not at 100 servers"
+   },
+   {
+    "_id": "rule.intent-under-10k-toggle",
+    "title": "Under 10,000 users: just toggle the intent on, no approval and no verification"
+   },
+   {
+    "_id": "rule.intent-threshold-100-servers",
+    "title": "Before June 10, 2026: intents were self-serve under 100 servers and needed an application at 100+"
+   },
+   {
+    "_id": "rule.flags-table-100-servers",
+    "title": "Application flags table still says intents are required at 100 or more servers"
+   },
+   {
+    "_id": "rule.intent-90-day-window",
+    "title": "At 10,000 users you get 90 days from the notification to apply"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'yes, you are over 100 servers so you must apply and verify'. That was true until June 9, 2026 and the flags table still says it.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ],
+   "servers": 150,
+   "users": 4000,
+   "verified": false
+  },
+  "text": "My bot is in 150 servers. Do I need to apply for the Message Content intent?",
+  "answer": "**Ruling:** No. With 4,000 unique users you are under the 10,000-user threshold, so you just toggle Message Content on in the Developer Portal, servers do not matter.\n\n**Why:** The current rule, effective from 2026-06-10:\n\n> \"When an app has more than 10,000 unique users who can see your app across all the servers it's in, it requires review for continued access to Privileged Intents. Once you hit this threshold, the app or team owner will receive a system DM and/or an email.\"\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\nAnd specifically for your bracket:\n\n> \"Apps with fewer than 10,000 users can access privileged intents by enabling them in the Developer Portal.\"\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\n**Watch out:** The old Application resource docs still say:\n> \"GATEWAY_MESSAGE_CONTENT | Intent required for bots in **100 or more servers** to receive message content\"\nSource: [Application resource (developer docs)](https://docs.discord.com/developers/resources/application)\nThat page is stale (effective 2022-09-01 to 2026-06-09, contradiction C1). It would flag your 150-server bot as needing review, but the newer change log and Gateway docs (2026-06-10) explicitly say user count, not server count, now controls this, and they win on both recency and specificity. Your verification status also does not matter here: verification and intent review are separate processes since the same date.\n\n**Counsel notes:** 150 servers with only 4,000 users means you are nowhere near the real gate; just flip the toggle and keep an eye on your user count, not your server count, going forward.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 11.5,
+  "error": null
+ },
+ {
+  "_id": "question.q03",
+  "expectedAnswer": "Yes. Access granted through a prior review must be reapplied for annually. You will receive a notification, then have 90 days to reapply; access continues during review. Do not reapply before the notice arrives.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-annual-reapply",
+    "title": "Access granted through a past review must be renewed every year"
+   },
+   {
+    "_id": "rule.intent-90-day-window",
+    "title": "At 10,000 users you get 90 days from the notification to apply"
+   },
+   {
+    "_id": "rule.intent-access-continues-during-review",
+    "title": "Your intents keep working while your application is under review"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'no, approval is permanent'. Annual reapplication started June 10, 2026.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ],
+   "verified": true
+  },
+  "text": "I already got Message Content approved in 2023. Do I need to do anything?",
+  "answer": "**Ruling:** Yes, you are on the hook for annual reapproval, but only once Discord actually notifies you; nothing to file today unless a notice has already landed.\n\n**Why:** Since 10 June 2026, prior approvals like your 2023 Message Content grant do not stand forever.\n\nEffective from 2026-06-10:\n> \"If your app already has Privileged Intent access granted from a prior review, you're good for now, but you will need to reapply annually.\"\nSource: [Getting Started with Privileged Intent Review (developer docs)](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review)\n\nAnd per the support article on the same 90-day mechanics:\n> \"You will receive advance notice via email and/or system DM before your reapplication date... After receiving the notice, you have 90 days to reapply.\"\nSource: [Changes to Privileged Intent Access for Discord Apps (developer support)](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps)\n\n**Watch out:** Two things could change this. First, verification status is irrelevant to this cycle since verification and intent review were split apart on the same date. Second, if you've slipped under 10,000 unique users, the annual reapproval clock still nominally applies to apps \"granted from a prior review\" regardless of current count, per the rule's wording, so don't assume dropping below the line exempts you unless Discord's notice says otherwise. Do not file preemptively: the dataset is explicit that if no notice has arrived, wait for it rather than submitting early.\n\n**Counsel notes:** Set a calendar reminder to check email and Developer Portal alerts; Discord does not tell you the countdown starts until it starts.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "privileged_intents/thresholds_and_approval"
+     ]
+    }
+   }
+  ],
+  "seconds": 17.3,
+  "error": null
+ },
+ {
+  "_id": "question.q04",
+  "expectedAnswer": "4014 is Disallowed intent(s): an intent in your IDENTIFY bitfield is not enabled in the Developer Portal (or, above 10,000 users, not granted). With 3,000 users you are under the threshold, so turn the toggle on under Bot > Privileged Gateway Intents and reconnect. Being in 120 servers is irrelevant. 4013 is a different error for an invalid bitfield.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-4014-disallowed",
+    "title": "Close code 4014 means you passed an intent that is not enabled or not approved"
+   },
+   {
+    "_id": "rule.intent-under-10k-toggle",
+    "title": "Under 10,000 users: just toggle the intent on, no approval and no verification"
+   },
+   {
+    "_id": "rule.intent-threshold-10k-users",
+    "title": "Privileged intents need review at 10,000 users, not at 100 servers"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'you are over 100 servers so you need to get verified and approved first'.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "GUILD_MEMBERS"
+   ],
+   "servers": 120,
+   "users": 3000,
+   "verified": false
+  },
+  "text": "I got close code 4014 when connecting. What's wrong?",
+  "answer": "**Ruling:** Fixable without any application: your app is under the 10,000 user threshold, so you just have not switched the toggle on for that intent (or your code and portal are out of sync).\n\n**Why:** Close code 4014 is defined as passing an intent you have not enabled or are not approved for, effective from 2020-10-27:\n\n> You sent a disallowed intent for a Gateway Intent. You may have tried to specify an intent that you have not enabled or are not approved for.\nSource: [Opcodes and Status Codes (developer docs)](https://docs.discord.com/developers/topics/opcodes-and-status-codes)\n\nAt 3,000 users you are well under the current 10,000-user gate, effective from 2026-06-10, so no application or verification is involved at all:\n\n> Apps with fewer than 10,000 users can access privileged intents by enabling them in the Developer Portal.\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\nThe fix has two parts, both required: Developer Portal → your app → Bot tab → Privileged Gateway Intents → toggle GUILD_MEMBERS on, and confirm your code actually requests the GUILD_MEMBERS bit in the Identify payload, then restart the bot so it opens a fresh Gateway connection (intent changes only apply on a new connection).\n\n**Watch out:** Your 120 servers do not matter here at all, this used to be a 100-server verification gate but that was replaced on 2026-06-10 by the 10,000-user gate; server count is now irrelevant to intents, and being unverified does not block toggling this on. If you ever cross 10,000 unique users, that is when you need to actually apply (90-day window from notification).\n\n**Counsel notes:** Nine times out of ten a 4014 is a forgotten toggle or a stale bot process, not a policy problem.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "gateway_api",
+      "privileged_intents/thresholds_and_approval"
+     ]
+    }
+   }
+  ],
+  "seconds": 15.9,
+  "error": null
+ },
+ {
+  "_id": "question.q12",
+  "expectedAnswer": "Yes, only as necessary for your app's stated (and, if reviewed, approved) functionality (Developer Policy 15). It must be described in your privacy policy (Developer Terms 5a), encrypted at rest (5c) and deleted promptly when no longer necessary, on user request, or when you shut down (5b). No fixed retention window exists in any Discord document. Message content may not be used to train ML or AI models without Discord's express permission (Policy 21).",
+  "expectedRules": [
+   {
+    "_id": "rule.api-data-stated-functionality",
+    "title": "Can I store user IDs and message content? Yes, if it is necessary for your stated functionality"
+   },
+   {
+    "_id": "rule.privacy-policy-required",
+    "title": "Every app needs a privacy policy, even a bot in one private server"
+   },
+   {
+    "_id": "rule.encrypt-at-rest",
+    "title": "API data must be encrypted at rest"
+   },
+   {
+    "_id": "rule.retention-no-longer-necessary-2024",
+    "title": "How long can I keep API data? Only as long as necessary for your stated functionality; no fixed number"
+   },
+   {
+    "_id": "rule.ml-training-ban",
+    "title": "You may not train ML or AI models on message content without Discord's express permission"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ]
+  },
+  "text": "Can I store user IDs and message content in my database?",
+  "answer": "No conflicts flagged on the relevant current rules. Answering from the current (2024-07-08 effective) Developer Policy and Terms plus the intent review guidance for MESSAGE_CONTENT storage.\n\n**Ruling:** Yes, you can store user IDs and message content, but only as much as your app's stated functionality actually needs, and you must delete it once it's no longer needed.\n\n**Why:** Current Developer Policy, effective from 2024-07-08:\n> \"You may not request, access, or use API Data for any purpose other than as necessary to provide your Application's stated (and approved through App Review, as applicable) functionality; provided that you may also use API Data for the purpose of improving your Application only if it has been aggregated or de-identified such that it cannot be associated with, or used to identify, any individual.\"\nSource: [Discord Developer Policy (current, effective July 8, 2024) (developerPolicy)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\nDeletion duty, same effective date:\n> \"you will (1) promptly update the API Data upon request from us or the applicable user, and (2) promptly delete the API Data when: (a) retaining it is no longer necessary for your Application's stated (and approved through App Review, as applicable) functionality that is permitted under the Terms; (b) you stop operating your Application... (c) we request you delete it; (d) the applicable user requests you delete it; or (e) required by applicable laws or regulations.\"\nSource: [Discord Developer Terms of Service (current, effective July 8, 2024) (developerTerms)](https://support-dev.discord.com/hc/en-us/articles/8562894815383-Discord-Developer-Terms-of-Service)\n\nBecause you have MESSAGE_CONTENT, if that data is stored (not just processed and discarded), the intent review process, effective from 2026-06-10, requires you to disclose this:\n> \"If you're storing the data, explain why it's necessary and describe your retention policy and security measures. If you're processing it in memory and discarding it, say so.\"\nSource: [Getting Started with Privileged Intent Review (developer docs)](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review)\n\n**Watch out:** Three hard bans stack on top of the general rule: you must encrypt stored API data at rest (Developer Terms, effective 2024-07-08), you may not use message content to train ML/AI models without Discord's express permission (Developer Policy, same date), and you must maintain a public privacy policy describing exactly what you collect, use, share, and how users can request deletion. There is no numeric retention window in any current document, \"no longer than necessary\" is the only standard.\n\n**Counsel notes:** \"Necessary for stated functionality\" is doing all the work here; document your reason now, not when the review form asks for it.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.dataRetention\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 13.9,
+  "error": null
+ },
+ {
+  "_id": "question.u03",
+  "expectedAnswer": "Best answer: June 10, 2026, from the change log and the review guide. But the announcement page itself is undated (it says 'today'), its metadata says created May 6, 2026 and edited June 11, 2026. The agent should give June 10, 2026 with the caveat that the primary source carries no date.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-change-date-changelog",
+    "title": "The intent change is dated June 10, 2026 in the change log"
+   },
+   {
+    "_id": "rule.intent-change-date-guide",
+    "title": "The review guide says the changes took effect as of June 10th, 2026"
+   },
+   {
+    "_id": "rule.intent-change-date-announcement-undated",
+    "title": "The announcement says 'today' but carries no date"
+   }
+  ],
+  "kind": "unknown",
+  "note": "Partial knowledge: a defensible date with an explicit caveat, not a confident single answer.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "What is the exact date the 10,000-user rule started?",
+  "answer": "**Ruling:** June 10, 2026.\n\n**Why:** The change log and review guide both date the switch to a 10,000 unique-user threshold, and the dataset's own resolution note settles a three-way date conflict (contradictionId C3) in favor of that date.\n\n`effective from 2026-06-10`\n> Today, we're announcing changes to how Discord Apps access Privileged Intent with a new user-based threshold for when access requires review and an annual process to reapply for continued access.\nSource: [Change Log (developer docs)](https://docs.discord.com/developers/change-log)\n\nConfirmed by the review guide:\n\n> As of June 10th, 2026, we've made some changes to the Privileged Intents review process.\nSource: [Getting Started with Privileged Intent Review (developer docs)](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review)\n\n**Watch out:** The original announcement page (developer support article) says \"today\" but prints no date; its metadata shows created May 6 2026, edited June 11 2026, updated September 16 2026, so it cannot be cited alone for the date. The 100-servers threshold it replaced ran from 2020-10-27 to 2026-06-09.\n\n**Counsel notes:** Three official pages, three ways to describe one date, dataset had to arbitrate. Cite the change log, not the \"today\" article.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 9.7,
+  "error": null
+ }
+]

@@ -1,0 +1,10 @@
+{
+ "base": "http://localhost:3111",
+ "question": "Do I need a privacy policy for a bot in one private server?",
+ "asOf": null,
+ "status": 200,
+ "seconds": 1.2,
+ "tools": [],
+ "error": "An error occurred.",
+ "answer": ""
+}

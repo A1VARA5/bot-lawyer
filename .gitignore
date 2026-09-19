@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+# Discord page snapshots are their content, not ours. The source map, contradictions and questions are in research/.
+research/raw/
+research/kb-upload/
+seed/*.zip

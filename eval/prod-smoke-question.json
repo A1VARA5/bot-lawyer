@@ -1,0 +1,17 @@
+{
+ "base": "https://bot-lawyer.vercel.app",
+ "question": "My bot is in 90 servers and reads message content. Do I need the Message Content intent approved?",
+ "asOf": null,
+ "status": 200,
+ "seconds": 19.9,
+ "tools": [
+  {
+   "tool": "groq_query",
+   "input": {
+    "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, confidence, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, authority}} | order(effectiveFrom desc)"
+   }
+  }
+ ],
+ "error": null,
+ "answer": "The threshold that actually governs this changed on June 10, 2026: server count no longer matters at all. What matters is unique users who can see your app across all its servers.\n\n**Ruling:** depends, I need your unique user count, not your server count, to answer.\n\n**Why:** the rule that applies, `effective from 2026-06-10`:\n\n> \"When an app has more than 10,000 unique users who can see your app across all the servers it's in, it requires review for continued access to Privileged Intents. Once you hit this threshold, the app or team owner will receive a system DM and/or an email.\"\n\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\nAnd for apps under that line:\n\n> \"Apps with fewer than 10,000 users can access privileged intents by enabling them in the Developer Portal.\"\n\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\n**Watch out:** the old \"100 servers\" gate is stale. Two other pages on Discord's own docs site still print it (an application flags table and a leftover gateway bullet tying it to verification), but both are marked superseded as of 2026-06-09 and the resolution on file says the June 10 change log and current Gateway text win because they are newer and explicit. Server count and verification status are both irrelevant now; verification and intent review are separate processes since June 10, 2026. Also, Discord does not show a raw user count in the Developer Portal, it only alerts you by portal banner, email or system DM once you cross 10,000.\n\n**Counsel notes:** 90 servers tells me nothing by itself, ten heavily populated servers can clear 10,000 users while ninety small ones might not. Tell me your unique user count and I will give you a straight answer."
+}

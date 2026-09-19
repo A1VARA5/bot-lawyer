@@ -1,0 +1,10 @@
+{
+ "base": "http://localhost:3111",
+ "question": "My bot is in 120 servers with 4,000 unique users and reads message content. Do I need the Message Content intent approved?",
+ "asOf": "2026-05-01",
+ "status": 200,
+ "seconds": 1.5,
+ "tools": [],
+ "error": "An error occurred.",
+ "answer": ""
+}

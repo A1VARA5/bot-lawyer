@@ -1,0 +1,1169 @@
+[
+ {
+  "_id": "question.q01",
+  "expectedAnswer": "Server count is irrelevant since June 10, 2026. With about 4,000 users you are under the 10,000 user threshold: toggle Message Content on in Developer Portal > Bot > Privileged Gateway Intents, no application, no verification. At 10,000 users you get a notification and 90 days to apply. Before June 10, 2026 the answer was yes (100+ servers required application and verification). The application flags table that still says 100 or more servers is stale.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-threshold-10k-users",
+    "title": "Privileged intents need review at 10,000 users, not at 100 servers"
+   },
+   {
+    "_id": "rule.intent-under-10k-toggle",
+    "title": "Under 10,000 users: just toggle the intent on, no approval and no verification"
+   },
+   {
+    "_id": "rule.intent-threshold-100-servers",
+    "title": "Before June 10, 2026: intents were self-serve under 100 servers and needed an application at 100+"
+   },
+   {
+    "_id": "rule.flags-table-100-servers",
+    "title": "Application flags table still says intents are required at 100 or more servers"
+   },
+   {
+    "_id": "rule.intent-90-day-window",
+    "title": "At 10,000 users you get 90 days from the notification to apply"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'yes, you are over 100 servers so you must apply and verify'. That was true until June 9, 2026 and the flags table still says it.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ],
+   "servers": 150,
+   "users": 4000,
+   "verified": false
+  },
+  "text": "My bot is in 150 servers. Do I need to apply for the Message Content intent?",
+  "answer": "**Ruling:** Can't say yet. Server count stopped being the trigger on 2026-06-10; I need your unique user count instead.\n\n**Why:** The current rule, `effective from 2026-06-10`, replaced the server-count gate:\n\n> \"When an app has more than 10,000 unique users who can see your app across all the servers it's in, it requires review for continued access to Privileged Intents. Once you hit this threshold, the app or team owner will receive a system DM and/or an email.\"\n— [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\nThe old 100-server rule is superseded and explicitly marked stale in the dataset (`effectiveTo: 2026-06-09`):\n\n> \"GATEWAY_MESSAGE_CONTENT | Intent required for bots in **100 or more servers** to receive message content\"\n— [Application resource (developer docs)](https://docs.discord.com/developers/resources/application) (superseded)\n\n**Watch out:** These two pages conflict on their face (one says 100 servers, one says 10,000 users). Resolution in the dataset: the 10,000-user rule wins because the June 10, 2026 change log is newer and explicit, and the 100-server flags table simply wasn't updated. So 150 servers tells me nothing on its own — a bot could have 150 servers and 500,000 unique users, or 150 servers and 3,000 unique users, and the answer flips.\n\n**Counsel notes:** Discord doesn't show a user count in the portal either, so you'll want to estimate it yourself or wait for the alert/email/DM they send at 10,000.\n\nWhat's your app's unique user count across all servers, roughly?",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 13.6,
+  "error": null
+ },
+ {
+  "_id": "question.q02",
+  "expectedAnswer": "You cannot. Discord does not display the user count in the Developer Portal; it counts unique users across all servers the app is installed in and notifies you (portal alert, email or system DM) when you cross 10,000. The server bot install count under Privileged Gateway Intents is a different metric, as Discord staff admitted in GitHub issue 7806.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-user-count-not-shown",
+    "title": "Discord does not show your app's user count"
+   },
+   {
+    "_id": "rule.staff-two-install-metrics",
+    "title": "Discord staff: the portal's install count and the intents install count are different numbers"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'check the server count on General Information, you need approval at 100'. Server counts are the wrong metric.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "How do I see how many users my app has, so I know if I'm near 10,000?",
+  "answer": "**Ruling:** Discord does not show you a user count anywhere in the Developer Portal, so you can't check a live number; you'll only find out you crossed 10,000 when Discord notifies you.\n\n**Why:** Rule `rule.intent-user-count-not-shown`, effective from 2026-06-10:\n\n> \"We don't display your app's user count in the Developer Portal. When your app grows beyond the 10,000-user threshold and triggers Privileged Intents access review, you'll see an alert in the Developer Portal and receive a notification via email and/or system DM.\"\n\nSource: [Changes to Privileged Intent Access for Discord Apps](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps).\n\nThe 10,000 figure itself is unique users across every server your app is installed in, not server count:\n\n> \"When an app has more than 10,000 unique users who can see your app across all the servers it's in, it requires review for continued access to Privileged Intents.\"\n\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway), effective from 2026-06-10.\n\n**Watch out:** Don't confuse this with the server counts still shown in the portal. The Bot page's \"Privileged Gateway Intents\" server count and the General Information install count are both leftover metrics from the pre-June-2026 100-server regime (`rule.staff-two-install-metrics`, `rule.flags-table-100-servers`); neither reflects the current 10,000-user gate, and the docs' flags table still wrongly says \"100 or more servers\" (superseded 2026-06-09). Also don't try to reverse-engineer it from your server list, since a small number of large servers can push unique users past 10,000 even with few installs.\n\n**Counsel notes:** You'll find out you're near the line the same way everyone else does now: an alert lands and you have 90 days, so don't wait for a dashboard number that doesn't exist.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "privileged_intents/thresholds_and_approval",
+      "privileged_intents/portal_issues"
+     ]
+    }
+   }
+  ],
+  "seconds": 14.8,
+  "error": null
+ },
+ {
+  "_id": "question.q03",
+  "expectedAnswer": "Yes. Access granted through a prior review must be reapplied for annually. You will receive a notification, then have 90 days to reapply; access continues during review. Do not reapply before the notice arrives.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-annual-reapply",
+    "title": "Access granted through a past review must be renewed every year"
+   },
+   {
+    "_id": "rule.intent-90-day-window",
+    "title": "At 10,000 users you get 90 days from the notification to apply"
+   },
+   {
+    "_id": "rule.intent-access-continues-during-review",
+    "title": "Your intents keep working while your application is under review"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'no, approval is permanent'. Annual reapplication started June 10, 2026.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ],
+   "verified": true
+  },
+  "text": "I already got Message Content approved in 2023. Do I need to do anything?",
+  "answer": "**Ruling:** Yes. Prior approval carries over, but it is not permanent: you now have to reapply annually and Discord will flag when it is time.\n\n**Why:** `rule.intent-annual-reapply`, effective from 2026-06-10, applies to any app with a prior Privileged Intent grant, including a 2023 approval:\n\n> \"If your app already has Privileged Intent access granted from a prior review, you're good for now, but you will need to reapply annually.\"\n\nSource: [Getting Started with Privileged Intent Review](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review), developer docs.\n\nThis sits alongside the June 10, 2026 threshold change itself. The current gate is unique users, not servers, per `rule.intent-threshold-10k-users`:\n\n> \"When an app has more than 10,000 unique users who can see your app across all the servers it's in, it requires review for continued access to Privileged Intents.\"\n\nSource: [Gateway](https://docs.discord.com/developers/events/gateway), developer docs, effective 2026-06-10. Note this rule conflicts with a stale flags table (`rule.flags-table-100-servers`) that still says \"100 or more servers\" — that page was not updated and the resolution field says the newer, explicit change log wins.\n\n**Watch out:** You don't file anything proactively. Discord notifies you (email, system DM, Developer Portal alert) when your annual reapproval is due, and separately whenever you cross the 10,000-unique-user mark you get a 90-day window to apply (`rule.intent-90-day-window`). Miss either notice and the intent access is pulled, though you can reapply any time. Don't reapply speculatively before a notice arrives, the reapply rule says \"you're good for now.\"\n\n**Counsel notes:** Approval in 2023 bought you a reprieve, not a lifetime pass. Keep an eye on your Developer Portal alerts and the owner's email/DM inbox.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 12.2,
+  "error": null
+ },
+ {
+  "_id": "question.q04",
+  "expectedAnswer": "4014 is Disallowed intent(s): an intent in your IDENTIFY bitfield is not enabled in the Developer Portal (or, above 10,000 users, not granted). With 3,000 users you are under the threshold, so turn the toggle on under Bot > Privileged Gateway Intents and reconnect. Being in 120 servers is irrelevant. 4013 is a different error for an invalid bitfield.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-4014-disallowed",
+    "title": "Close code 4014 means you passed an intent that is not enabled or not approved"
+   },
+   {
+    "_id": "rule.intent-under-10k-toggle",
+    "title": "Under 10,000 users: just toggle the intent on, no approval and no verification"
+   },
+   {
+    "_id": "rule.intent-threshold-10k-users",
+    "title": "Privileged intents need review at 10,000 users, not at 100 servers"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'you are over 100 servers so you need to get verified and approved first'.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "GUILD_MEMBERS"
+   ],
+   "servers": 120,
+   "users": 3000,
+   "verified": false
+  },
+  "text": "I got close code 4014 when connecting. What's wrong?",
+  "answer": "**Ruling:** Close code 4014 means you tried to use a privileged intent that your app has not enabled in the portal, or has not been approved for.\n\n**Why:** From the rules dataset, effective from 2020-10-27:\n> \"You sent a disallowed intent for a Gateway Intent. You may have tried to specify an intent that you have not enabled or are not approved for.\"\nSource: [Opcodes and Status Codes (developer docs)](https://docs.discord.com/developers/topics/opcodes-and-status-codes)\n\nThe gateway docs confirm this is specific to the three privileged intents (Guild Members, Guild Presences, Message Content) and that it is not reconnectable — you have to fix the cause before retrying, not just reconnect.\n\n**Watch out:** Two separate fixes depending on cause:\n1. If you're under the 10,000 unique-user threshold, just toggle the intent on in the Developer Portal (Bot tab → Privileged Gateway Intents) and request it in your Identify payload. No application needed.\n2. If you're at or above 10,000 unique users, you need approval first via the intent application in the portal before the toggle will stick.\n\nAlso check you're not confusing this with 4013 (invalid intents bitfield), which is a different bug — a malformed bitfield rather than a permissions issue.\n\n**Counsel notes:** Tell me your unique user count and which intent you're requesting and I can tell you which of the two fixes applies to you.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.intents\") && (quote match \"*4014*\" || title match \"*close code*\" || title match \"*Disallowed*\" || plainAnswer match \"*4014*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "gateway_api",
+      "privileged_intents/thresholds_and_approval"
+     ]
+    }
+   }
+  ],
+  "seconds": 14.6,
+  "error": null
+ },
+ {
+  "_id": "question.q05",
+  "expectedAnswer": "Sometimes. All sources agree on three exceptions: messages the app sends, DMs with the app, messages that mention the app. The June 2026 guide adds replies to a regular bot message when the user has ping on reply enabled (not replies to slash command responses). The gateway page adds the target message of a message context menu command and omits replies. Give the union and cite both pages.",
+  "expectedRules": [
+   {
+    "_id": "rule.message-content-exceptions-gateway",
+    "title": "Without the intent you still get content for: your own messages, DMs, mentions, and context menu targets"
+   },
+   {
+    "_id": "rule.message-content-exceptions-guide",
+    "title": "The June 2026 guide adds replies (with ping on reply) as a content exception and omits context menu targets"
+   },
+   {
+    "_id": "rule.message-content-exceptions-changelog-2022",
+    "title": "The 2022 change log lists only three exceptions: own messages, DMs, mentions"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": []
+  },
+  "text": "Can my bot read message content without the intent if the user replies to it?",
+  "answer": "**Ruling:** Yes, but only under specific conditions: the reply must be a reply to your bot's regular message (not a slash command response), and the user must have \"ping on reply\" enabled.\n\n**Why:** Three official Discord pages give slightly different lists of exceptions to the Message Content intent (contradictionId C8). The most specific and newest, `effective from 2026-06-10`:\n\n> \"The Message Content intent is **not** needed for your app to access message content in these situations: ... **Replies to your app's messages.** Note: this applies to replies sent using Discord's reply feature to a regular bot message (not an interaction response) and the user has \"ping on reply\" enabled. It does not apply to replies to slash command responses.\"\n— [You Might Not Need a Privileged Intent (developer docs)](https://docs.discord.com/developers/gateway/you-might-not-need-a-privileged-intent)\n\nThe gateway page (`effective from 2022-09-01`) lists a different, overlapping set and does not mention replies at all:\n\n> \"Apps **without** the intent will receive empty values in fields that contain user-inputted content with a few exceptions: Content in messages that an app sends; Content in DMs with the app; Content in which the app is mentioned; Content of the message a message context menu command is used on\"\n— [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\n**Watch out:** If the reply is to a slash command's interaction response rather than a regular message your bot sent, this exception does not apply and you get empty content. If the user has \"ping on reply\" turned off, the exception also does not apply. The dataset's resolution treats these three lists as a union rather than one page overriding another, since each is incomplete rather than contradictory in substance.\n\n**Counsel notes:** Discord's own docs can't agree on their own exception list, so build for the strict case (interaction responses, ping-on-reply off) and don't assume content will be there.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\" && (title match \"*Message Content*\" || quote match \"*message content*\" || quote match \"*mention*\" || quote match \"*repl*\" || quote match \"*DM*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 11.7,
+  "error": null
+ },
+ {
+  "_id": "question.q06",
+  "expectedAnswer": "Officially undetermined. Verification is required for Discovery (App Directory) and Premium Apps, and since June 10, 2026 it is separate from intents and growth is not blocked during review. The only page saying 'Verification is required for your app to scale past 100 servers' was last edited 2024-08-30 and no current page confirms or retracts a cap. Cite both and ask Discord developer support.",
+  "expectedRules": [
+   {
+    "_id": "rule.verification-required-past-100-servers",
+    "title": "Support article still says verification is required to scale past 100 servers"
+   },
+   {
+    "_id": "rule.growth-not-blocked-during-review",
+    "title": "Hitting the threshold no longer blocks your app from joining new servers"
+   },
+   {
+    "_id": "rule.verification-unlocks-discovery-monetisation",
+    "title": "What verification unlocks: Discovery (App Directory) and monetisation"
+   },
+   {
+    "_id": "rule.verification-intent-review-separate",
+    "title": "App Verification and Privileged Intent review are separate processes"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'yes, unverified bots stop at 100 servers'. The honest answer is that no current source states a cap.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "servers": 97,
+   "verified": false
+  },
+  "text": "Do I need to be verified to go past 100 servers?",
+  "answer": "This is exactly the contradiction the dataset flags as unresolved (C4). Here it is straight.\n\n**Ruling:** Depends, and honestly unresolved: no current Discord page confirms a hard 100-server cap for unverified apps anymore, but none explicitly retracts it either.\n\n**Why:** Three rules collide here, all `contradictionId: C4`.\n\nThe old support article, `effective from 2024-08-30`:\n> \"Verification is required for your app to scale past 100 servers.\"\n[How Do I Get My App Verified? (developer support)](https://support-dev.discord.com/hc/en-us/articles/23926564536471-How-Do-I-Get-My-App-Verified)\n\nAgainst the June 10, 2026 change (`effective from 2026-06-10`):\n> \"Previously, when an app hit 100 servers and was required to apply for continued access to its Privileged Intents, it was blocked from joining new servers until the review was complete. That's no longer the case. Under the new user-based threshold, apps can continue joining servers and reaching new users while their submission is under review.\"\n[Changes to Privileged Intent Access for Discord Apps (developer support)](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps)\n\nAnd separately, on what verification is actually for (`effective from 2026-06-10`):\n> \"App Verification also allows you to add monetization features to your app, such as in-app purchases and subscriptions.\"\n[Enabling Discovery (developer docs)](https://docs.discord.com/developers/discovery/enabling-discovery)\n\nThe dataset's own resolution note: \"Unresolved... no current page retracts the 100 server cap for unverified apps either... Our ruling: cite both, say no current source states a cap, and recommend asking developer support.\"\n\n**Watch out:** The 100-server language you're worried about was written for the old intent-threshold regime, which is dead since 2026-06-10 (it's now 10,000 unique users for privileged intents, and verification is a separate track from intent review). But that 2024 support article about a server cap for verification specifically was never formally withdrawn.\n\n**Counsel notes:** Growing past 100 servers unverified will not get you throttled by anything I can point to today, but I would not bet App Directory eligibility or a support ticket on it either; ask Discord developer support to confirm before you plan around it.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.verification\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, publishedAt, lastEditedAt}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 14.9,
+  "error": null
+ },
+ {
+  "_id": "question.q07",
+  "expectedAnswer": "Not on your own ID. Since 2022 the person submitting ID to Stripe must be 16 or over. A 16+ team owner (parent, guardian, friend or co-developer) verifies on the app's behalf and must own the team; you stay a member. Operating a bot only needs Discord's minimum age for your country (13 in most places). At 16 you can verify yourself.",
+  "expectedRules": [
+   {
+    "_id": "rule.age-16-verify",
+    "title": "The person who submits ID for verification must be 16 or over"
+   },
+   {
+    "_id": "rule.age-min-operate-bot",
+    "title": "The minimum age to operate a verified bot is Discord's minimum age for your country"
+   },
+   {
+    "_id": "rule.verification-owner-stripe-id",
+    "title": "To verify, the team owner must verify their identity through Stripe"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "verified": false
+  },
+  "text": "I'm 15. Can I verify my bot?",
+  "answer": "**Ruling:** Not on your own ID. You can still get your bot verified, but someone 16 or older has to submit the identity verification for you.\n\n**Why:** Two rules from developer support apply, both effective 2022-05-23:\n\n> \"However, the individual who applies to verify your bot will need to be 16 or over.\"\n[An Update on Verifications for Users Under 16](https://support-dev.discord.com/hc/en-us/articles/6276106082583-An-Update-on-Verifications-for-Users-Under-16)\n\n> \"As before, the minimum age for operating a verified bot on Discord is the same as the minimum age for using Discord in your country.\"\n[An Update on Verifications for Users Under 16](https://support-dev.discord.com/hc/en-us/articles/6276106082583-An-Update-on-Verifications-for-Users-Under-16)\n\nSo at 15 you're old enough to own and run the bot (Discord's general minimum is 13, per the Terms of Service, effective 2025-09-29), but Stripe identity verification needs a submitter aged 16+. Put a parent, guardian, or co-developer aged 16 or over on the team to file that verification, while you remain a member of the team.\n\n**Watch out:** The 16+ submitter needs to keep owning the team going forward, since verification status resets on ownership transfer. If they leave the team later, you'd need to re-verify.\n\n**Counsel notes:** Recruit an adult (or at least a 16-year-old) you trust before you hit submit on that Stripe form.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.ageRequirements\" || area._ref == \"area.verification\") && (title match \"*age*\" || quote match \"*16*\" || quote match \"*under*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 10.4,
+  "error": null
+ },
+ {
+  "_id": "question.q08",
+  "expectedAnswer": "Yes, through a Developer Support ticket: the current owner requests, the recipient consents, both have 30 days, verification is removed and identity data deleted, and the new owner re-verifies. Unverified apps move to a team self-serve via Transfer App to Team. The older Under 16 article's 'ownership can't be transferred after verification' is superseded by the September 2025 process.",
+  "expectedRules": [
+   {
+    "_id": "rule.ownership-transfer-process",
+    "title": "A verified app's team can be transferred, but verification is removed and the new owner re-verifies"
+   },
+   {
+    "_id": "rule.ownership-transfer-30-days",
+    "title": "Ownership transfer needs dual consent; both parties have 30 days to respond"
+   },
+   {
+    "_id": "rule.ownership-cannot-transfer-after-verification",
+    "title": "Under 16 article: team ownership cannot be transferred after verification"
+   },
+   {
+    "_id": "rule.ownership-individual-to-team-self-serve",
+    "title": "Unverified apps move from an individual to a team with the self-serve 'Transfer App to Team' option"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'no, ownership can't be transferred after verification'. That article was never updated.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "verified": true
+  },
+  "text": "Can I transfer my verified bot's team to someone else?",
+  "answer": "**Ruling:** Yes, you can transfer a verified bot's team, but the transfer strips verification and the new owner must re-verify.\n\n**Why:** `rule.ownership-transfer-process`, effective from 2025-09-12:\n\n> If your developer team owns verified applications, transferring ownership will require **removing verification** from those applications. The new owner will need to reapply for verification after the transfer is complete.\n\nSource: [How to Transfer Ownership of a Developer Team](https://support-dev.discord.com/hc/en-us/articles/34905402845591-How-to-Transfer-Ownership-of-a-Developer-Team)\n\nTwo extra conditions apply on top of that:\n- Dual consent, 30-day window: \"After the **current owner** requests a transfer, Discord requires **consent from the recipient** before any ownership transfer. Both parties have **30 days to respond** to our requests.\" (same source, effective 2025-09-12)\n- Because the app is verified, this must go through a Developer Support ticket, not the self-serve \"Transfer App to Team\" button (that self-serve path is for unverified apps only).\n\n**Watch out:** There is an older, conflicting article (\"An Update on Verifications for Users Under 16,\" effective 2022-05-23 to 2025-09-11) that said \"ownership can't be transferred after verification is complete.\" That rule is superseded: the 2025-09-12 transfer article is newer, more specific, and covers exactly this scenario, so it controls. If your new owner is under 16, that raises a separate verification-eligibility question worth flagging separately.\n\n**Counsel notes:** Budget 30 to 60 days and expect to re-verify from scratch on the other side, that is the real cost of this move, not the paperwork.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.ownership\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 9.9,
+  "error": null
+ },
+ {
+  "_id": "question.q09",
+  "expectedAnswer": "Seconds. On API v8 and later (v10 is current) retry_after is a float in seconds and the Retry-After header is integer seconds; v8 changed this on September 24, 2020. The support article that says milliseconds is wrong. Sleep 2.5 seconds.",
+  "expectedRules": [
+   {
+    "_id": "rule.retry-after-seconds",
+    "title": "retry_after is seconds (float) on API v8 and later; the Retry-After header is integer seconds"
+   },
+   {
+    "_id": "rule.retry-after-milliseconds-support",
+    "title": "Support article says retry_after is milliseconds"
+   },
+   {
+    "_id": "rule.retry-after-v8-changelog",
+    "title": "API v8 (September 24, 2020) switched retry_after from milliseconds to seconds"
+   }
+  ],
+  "kind": "trap",
+  "note": "Stale answer: 'milliseconds', which the support article still says.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "I got a 429 with retry_after 2.5. Is that seconds or ms?",
+  "answer": "**Ruling:** Seconds. A `retry_after` of 2.5 means wait two and a half seconds, not 2.5 ms.\n\n**Why:** Rule `retry_after is seconds (float) on API v8 and later`, effective from 2020-09-24:\n\n> retry_after | float | The number of seconds to wait before submitting another request.\n\nSource: [Rate Limits (developer docs)](https://docs.discord.com/developers/topics/rate-limits). Confirmed by the change log entry of the same date:\n\n> The `Retry-After` header value and `retry_after` body value is now based in seconds instead of milliseconds (e.g. `123` means 123 seconds)\n\nSource: [Change Log (developer docs)](https://docs.discord.com/developers/change-log).\n\n**Watch out:** The developer support article \"My Bot is Being Rate Limited!\" (last edited 2025-07-14) still says:\n\n> `retry_after`: Milliseconds to wait before making another request\n\nThis conflicts (contradictionId C5). It's wrong and stale, kept from before API v8. Resolution favors the docs and changelog on authority (80 vs 60) and recency, plus the docs' own example pairs `Retry-After: 65` with `retry_after: 64.57`, which only makes sense as matching units in seconds.\n\n**Counsel notes:** Sleeping 2.5 milliseconds instead of 2.5 seconds will just re-trigger the 429 and start racking up invalid requests toward the 10,000-per-10-minutes IP ban.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.rateLimits\" || title match \"*retry*\" || title match \"*429*\" || quote match \"*retry_after*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 9.5,
+  "error": null
+ },
+ {
+  "_id": "question.q10",
+  "expectedAnswer": "50 requests per second per bot (per IP if unauthenticated). Interaction endpoints (respond, follow up, edit original) are exempt from the global limit whether or not the response is ephemeral; per route and shared limits still apply. Invalid requests (401, 403, 429 except shared scope 429) above 10,000 per 10 minutes trigger a temporary Cloudflare ban.",
+  "expectedRules": [
+   {
+    "_id": "rule.global-rate-limit-50",
+    "title": "Global rate limit: 50 requests per second per bot"
+   },
+   {
+    "_id": "rule.interaction-endpoints-exempt-global",
+    "title": "Interaction endpoints are exempt from the global rate limit, ephemeral or not"
+   },
+   {
+    "_id": "rule.ephemeral-not-counted-support",
+    "title": "Support article says ephemeral interaction responses do not count towards the rate limits"
+   },
+   {
+    "_id": "rule.invalid-request-limit-10k",
+    "title": "10,000 invalid requests in 10 minutes gets your IP temporarily banned by Cloudflare"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "What's the global rate limit and do slash command responses count?",
+  "answer": "**Ruling:** The global limit is 50 requests per second, and no, interaction (slash command) responses do not count against it, though a support article says otherwise and is wrong.\n\n**Why:** `effective from 2026-09-19`\n\n> All bots can make up to 50 requests per second to our API. If no authorization header is provided, then the limit is applied to the IP address. This is independent of any individual rate limit on a route.\n\nSource: [Rate Limits (developer docs)](https://docs.discord.com/developers/topics/rate-limits)\n\nOn slash commands specifically, same source and date:\n\n> Interaction endpoints are not bound to the bot's Global Rate Limit.\n\n**Watch out:** This is a live conflict (contradictionId C6). A developer support article claims something narrower and broader at once:\n\n> Bonus tip: Make Interaction Responses and follow-up messages ephemeral since they do not count towards the rate limits.\n— [My Bot is Being Rate Limited! (developer support)](https://support-dev.discord.com/hc/en-us/articles/6223003921559-My-Bot-is-Being-Rate-Limited), last edited 2025-07-14\n\nThat's wrong on scope in two ways: exemption applies to *all* interaction endpoints, ephemeral or not, and it only exempts them from the *global* 50/s limit, not from per-route or shared-bucket limits. The docs (authority 80) outrank the support article (authority 60), so the docs control.\n\n**Counsel notes:** Treat interaction responses as free from the global bucket, not free from rate limits altogether, and don't touch the ephemeral flag hoping it buys you anything here.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.rateLimits\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 10.5,
+  "error": null
+ },
+ {
+  "_id": "question.q11",
+  "expectedAnswer": "At 2,500 guilds sharding is mandatory; each shard supports at most 2,500 guilds and about one shard per 1,000 guilds is recommended. Above 150,000 guilds Discord migrates you to large bot sharding. IDENTIFY is limited to 1,000 calls per 24 hours across all shards.",
+  "expectedRules": [
+   {
+    "_id": "rule.sharding-2500",
+    "title": "Sharding is mandatory at 2,500 guilds"
+   },
+   {
+    "_id": "rule.sharding-2500-support",
+    "title": "Support: plan sharding at 2,000 guilds, mandatory at 2,500, about 1 shard per 1,000 guilds"
+   },
+   {
+    "_id": "rule.large-bot-sharding-150k",
+    "title": "Over 150,000 guilds Discord moves you to large bot sharding"
+   },
+   {
+    "_id": "rule.identify-limit-1000",
+    "title": "1,000 IDENTIFY calls per 24 hours across all shards; exceeding it resets your token"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "servers": 2500
+  },
+  "text": "When must I shard?",
+  "answer": "**Ruling:** Sharding becomes mandatory once your bot is in 2,500 or more guilds; plan for it starting around 2,000, and expect a further mandatory migration to large bot sharding near 150,000 guilds.\n\n**Why:** Per the developer docs, effective from 2026-09-19:\n> \"Each shard can only support a maximum of 2500 guilds, and apps that are in 2500+ guilds *must* enable sharding.\"\n— [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\nThe support article (effective from 2025-07-14) agrees and adds a planning cushion:\n> \"It's recommended to start planning for sharding implementation when approaching 2,000 guilds, as sharding **must** be enabled at 2,500+ guilds. For optimal performance, follow the best practice of maintaining approximately 1 shard per 1,000 guilds.\"\n— [My Bot is Being Rate Limited! (developer support)](https://support-dev.discord.com/hc/en-us/articles/6223003921559-My-Bot-is-Being-Rate-Limited)\n\nNo conflict here (`contradictionId` empty on both) — docs and support align.\n\n**Watch out:** At roughly 150,000 guilds Discord forces you onto \"large bot sharding\": your shard count must then be a multiple of an assigned shard number (invalid counts get close code 4010), and your daily session start limit jumps from 1,000 to `max(2000, guild_count / 1000 * 5)`.\n\n**Counsel notes:** 2,500 guilds isn't a suggestion, it's a hard gate; get `GET /gateway/bot`'s recommended shard count into your deploy pipeline before you're forced into it mid-incident.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (title match \"*shard*\" || quote match \"*shard*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"source\": source->{title, kind, url}}"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "gateway_api"
+     ]
+    }
+   }
+  ],
+  "seconds": 13.1,
+  "error": null
+ },
+ {
+  "_id": "question.q12",
+  "expectedAnswer": "Yes, only as necessary for your app's stated (and, if reviewed, approved) functionality (Developer Policy 15). It must be described in your privacy policy (Developer Terms 5a), encrypted at rest (5c) and deleted promptly when no longer necessary, on user request, or when you shut down (5b). No fixed retention window exists in any Discord document. Message content may not be used to train ML or AI models without Discord's express permission (Policy 21).",
+  "expectedRules": [
+   {
+    "_id": "rule.api-data-stated-functionality",
+    "title": "Can I store user IDs and message content? Yes, if it is necessary for your stated functionality"
+   },
+   {
+    "_id": "rule.privacy-policy-required",
+    "title": "Every app needs a privacy policy, even a bot in one private server"
+   },
+   {
+    "_id": "rule.encrypt-at-rest",
+    "title": "API data must be encrypted at rest"
+   },
+   {
+    "_id": "rule.retention-no-longer-necessary-2024",
+    "title": "How long can I keep API data? Only as long as necessary for your stated functionality; no fixed number"
+   },
+   {
+    "_id": "rule.ml-training-ban",
+    "title": "You may not train ML or AI models on message content without Discord's express permission"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ]
+  },
+  "text": "Can I store user IDs and message content in my database?",
+  "answer": "**Ruling:** Yes, but only as much as you actually need for your bot's stated functionality, and only for as long as you need it.\n\n**Why:** The current Developer Policy (effective from 2024-07-08) sets the purpose limit:\n\n> \"You may not request, access, or use API Data for any purpose other than as necessary to provide your Application's stated (and approved through App Review, as applicable) functionality; provided that you may also use API Data for the purpose of improving your Application only if it has been aggregated or de-identified such that it cannot be associated with, or used to identify, any individual.\"\n\nSource: [Discord Developer Policy (current, effective July 8, 2024)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\nTwo conditions layer on top, both from the current Developer Terms (effective from 2024-07-08), no conflicting versions found:\n\n> \"you will ... promptly delete the API Data when: (a) retaining it is no longer necessary for your Application's stated (and approved through App Review, as applicable) functionality ... (c) we request you delete it; (d) the applicable user requests you delete it; or (e) required by applicable laws or regulations.\"\n\n> \"encryption of the data at rest and (ii) maintaining administrative, physical, and technical safeguards...\"\n\nSource: [Discord Developer Terms of Service (current, effective July 8, 2024)](https://support-dev.discord.com/hc/en-us/articles/8562894815383-Discord-Developer-Terms-of-Service)\n\nThere is no fixed retention window in force today (that only existed in the 2017 terms, superseded 2020-08-18). Today it's \"as long as necessary\" plus prompt deletion triggers above.\n\n**Watch out:** If Message Content is a privileged intent for you (10,000+ unique users, effective from 2026-06-10), storing that content specifically also triggers a review-form disclosure duty:\n\n> \"If you're storing the data, explain why it's necessary and describe your retention policy and security measures. If you're processing it in memory and discarding it, say so.\"\n\nSource: [Getting Started with Privileged Intent Review](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review), effective from 2026-06-10. Separately, you may never fine-tune an ML/AI model on stored message content without Discord's express permission (Developer Policy, effective 2024-07-08).\n\n**Counsel notes:** Store what you need, encrypt it, delete it when the reason for having it goes away, and don't get creative with it later.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.dataRetention\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 13.6,
+  "error": null
+ },
+ {
+  "_id": "question.q13",
+  "expectedAnswer": "Yes. The Developer Terms apply to every Application regardless of size: you must provide and adhere to a privacy policy and keep a public link to it in the Developer Portal. Enforcement risk scales with reach, the obligation does not.",
+  "expectedRules": [
+   {
+    "_id": "rule.privacy-policy-required",
+    "title": "Every app needs a privacy policy, even a bot in one private server"
+   },
+   {
+    "_id": "rule.age-13-dev-tos",
+    "title": "You must be at least 13 to accept the Developer Terms; under the age of consent a parent must agree for you"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "servers": 1
+  },
+  "text": "Do I need a privacy policy for a bot in one private server?",
+  "answer": "**Ruling:** Yes, even a bot in a single private server needs a privacy policy.\n\n**Why:** This requirement comes from the Developer Terms of Service and applies to every application, not just ones that cross a server or user threshold, `effective from 2024-07-08`:\n\n> \"You will provide and adhere to a privacy policy for your Application that is compliant with applicable privacy laws and clearly, accurately, and fully describes to users of your Application what data you collect, how you use and share such data with us and third parties, and how users can request deletion of such data.\"\n\nSource: [Discord Developer Terms of Service (current, effective July 8, 2024)](https://support-dev.discord.com/hc/en-us/articles/8562894815383-Discord-Developer-Terms-of-Service)\n\n**Watch out:** This is separate from App Directory listing or verification thresholds, those add their own public-privacy-policy display requirements once you list or verify. The scale-based numbers (10,000 unique users, etc.) govern intent approval, not whether a privacy policy is required in the first place.\n\n**Counsel notes:** \"It's just for my friends' server\" is not a legal defense Discord recognizes.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.dataRetention\" && (title match \"*privacy*\" || quote match \"*privacy*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 8.8,
+  "error": null
+ },
+ {
+  "_id": "question.q14",
+  "expectedAnswer": "No, unless Discord grants express permission. Developer Policy rule 21, in force since July 8, 2024. The October 1, 2022 policy had no such rule.",
+  "expectedRules": [
+   {
+    "_id": "rule.ml-training-ban",
+    "title": "You may not train ML or AI models on message content without Discord's express permission"
+   },
+   {
+    "_id": "rule.dev-policy-version-2024",
+    "title": "Current Developer Policy: effective July 8, 2024, last updated June 6, 2024"
+   },
+   {
+    "_id": "rule.dev-policy-version-2022",
+    "title": "2022 Developer Policy: effective October 1, 2022, last updated September 1, 2022"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ]
+  },
+  "text": "Can I use message content from my bot to fine-tune an LLM?",
+  "answer": "Found the exact rule. No conflicts flagged.\n\n**Ruling:** No, you may not use message content from your bot to fine-tune an LLM without Discord's express permission.\n\n**Why:** Per the Developer Policy `effective from 2024-07-08`:\n\n> **21. Do not use message content obtained through the APIs to train machine learning or AI models (including large language models) unless express permission is granted by Discord.**\n\n[Discord Developer Policy (current, effective July 8, 2024)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\n**Watch out:** This rule did not exist in the October 1, 2022 Developer Policy, so if you're looking at an older mirror of the policy or a cached PDF, it won't mention this ban. It has applied continuously since July 8, 2024, and there is no listed sunset. Separately, storing message content at all requires the Message Content privileged intent and a stated, approved purpose under the general \"necessary for stated functionality\" rule.\n\n**Counsel notes:** \"Express permission from Discord\" is not something you get by emailing support and hoping; treat this as closed unless you have something in writing.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.dataRetention\" || title match \"*AI*\" || title match \"*machine learning*\" || title match \"*train*\" || quote match \"*machine learning*\" || quote match \"*train*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, publishedAt}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 11.4,
+  "error": null
+ },
+ {
+  "_id": "question.q15",
+  "expectedAnswer": "Only with the user's explicit permission. Developer Policy 5 bans contacting users without explicit permission and 6 bans marketing. A server owner enabling a welcome DM feature is not the user's permission; keep DMs tied to functionality the user triggered.",
+  "expectedRules": [
+   {
+    "_id": "rule.no-unsolicited-dms",
+    "title": "Do not DM users without their explicit permission"
+   },
+   {
+    "_id": "rule.no-marketing",
+    "title": "Do not target users with advertisements or marketing"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Can I DM users a welcome message when they join?",
+  "answer": "**Ruling:** No, not by default. A DM sent automatically when someone joins a server is treated as unsolicited contact, and that is against Discord's Developer Policy regardless of what intent you use to detect the join.\n\n**Why:** `area.intents`-adjacent policy rule, `effective from 2024-07-08`, still current:\n\n> **5. Do not contact users on Discord without their explicit permission.** This includes frequently sending unsolicited direct messages and/or sending direct messages not directly related to maintaining or improving an Application's functionality.\n\nSource: [Discord Developer Policy (current, effective July 8, 2024)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\nThe dataset's own gloss on this rule is blunt about the join case specifically:\n\n> A welcome DM on join is unsolicited unless the user themselves opted in. A server owner enabling a feature is not the user's permission; keep DMs tied to functionality the user triggered.\n\n**Watch out:** The server owner turning on a \"welcome DM\" feature does not count as the joining user's permission. If the DM is tied to something the user actually did (e.g. they ran a `/subscribe` command or ticked an opt-in role), that is functionality-related and defensible. A generic \"Welcome to the server!\" blast to every new member is the risky pattern. Note this rule has no conflicting source in the dataset, so there's no split authority to weigh here.\n\n**Counsel notes:** Put the welcome message in the server's welcome channel instead of the user's inbox, and let your lawyer sleep tonight.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (title match \"*DM*\" || title match \"*message*\" || quote match \"*direct message*\" || quote match \"*unsolicited*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 16.2,
+  "error": null
+ },
+ {
+  "_id": "question.q16",
+  "expectedAnswer": "Depends on region. Since October 7, 2024, in regions where Premium Apps exists (US, UK, EU), any paid feature must also be purchasable through Premium Apps at a price no higher than elsewhere. You can keep Patreon alongside. Outside those regions the rule does not apply yet.",
+  "expectedRules": [
+   {
+    "_id": "rule.price-parity-2024",
+    "title": "Since October 7, 2024 paid features must also be sold through Premium Apps at no higher price (US, UK, EU)"
+   },
+   {
+    "_id": "rule.monetisation-regions-docs",
+    "title": "Premium Apps is only available to teams based in the US, UK or EU"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "My bot sells premium via Patreon. Am I forced to use Discord's Premium Apps?",
+  "answer": "**One question first:** is your team (the app owner) based in the US, UK, or an EU member state, or somewhere else?\n\nThis matters because the price-parity rule only bites in Discord's supported Premium Apps regions.\n\n**Why it matters:**\n\nPer the Developer Policy, `effective from 2024-10-07`:\n\n> Beginning on October 7, 2024, in regions where Discord supports monetization through its Premium Apps products, all developers who offer paid features or capabilities for their Application will be required to:\n> * (i) support purchase of such features or capabilities through Discord's Premium Apps products; and,\n> * (ii) offer such features or capabilities at prices on Discord that are no higher than the prices at which they are offered through other payment options.\n\n[Discord Developer Policy](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\nIf your team is in the US, UK, or an EU member state, you are not free to sell only via Patreon: you'd be required to also offer the same paid features through Premium Apps, at a price there no higher than on Patreon. Outside those regions (Premium Apps isn't available there per the docs), this rule does not currently apply to you, and Patreon-only is fine.\n\nTell me your team's region and I'll give you the exact ruling.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.monetisation\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 11.0,
+  "error": null
+ },
+ {
+  "_id": "question.q17",
+  "expectedAnswer": "No. Premium Apps is available only to teams based in the United States, the United Kingdom and the 27 EU member states. Discord says more regions will follow but gives no date.",
+  "expectedRules": [
+   {
+    "_id": "rule.monetisation-regions-docs",
+    "title": "Premium Apps is only available to teams based in the US, UK or EU"
+   },
+   {
+    "_id": "rule.monetisation-regions-support",
+    "title": "Supported locales for Premium Apps: United States, United Kingdom, European Union (all 27 member states)"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "I'm in Canada / India / Brazil. Can I enable Premium Apps?",
+  "answer": "**Ruling:** No. Premium Apps monetisation is not currently available for teams based in Canada, India, or Brazil.\n\n**Why:** The Developer Docs, effective from 2026-09-19, state:\n\n> \"Premium Apps is not currently available outside of these regions. These features will be made available to more regions soon.\"\n\n— [Enabling Monetization (developer docs)](https://docs.discord.com/developers/monetization/enabling-monetization)\n\nThe supported locales, per developer support (effective 2024-12-12), are:\n\n> \"United States, United Kingdom, European Union\"\n\n— [How Do I Monetize My App? (developer support)](https://support-dev.discord.com/hc/en-us/articles/17297949965079-How-Do-I-Monetize-My-App)\n\nCanada, India, and Brazil are not on that list, so none of the three locations you named qualifies.\n\n**Watch out:** The team owner's location is what's checked, not the server's user base or where players are. If your team owner relocates to or is legally based in the US, UK, or an EU member state, that unlocks eligibility even if your users are elsewhere. Discord says more regions are coming \"soon\" but gives no date, so don't build a launch plan around that.\n\n**Counsel notes:** If you sell premium features elsewhere (Patreon, your own site) while ineligible for Premium Apps, the October 2024 price-parity rule doesn't bite you yet since it only applies once you're in a supported region.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.monetisation\" && (title match \"*eligib*\" || title match \"*residen*\" || title match \"*countr*\" || title match \"*region*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.monetisation\" && defined(appliesWhen.region)]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "monetization/eligibility"
+     ]
+    }
+   }
+  ],
+  "seconds": 21.1,
+  "error": null
+ },
+ {
+  "_id": "question.q18",
+  "expectedAnswer": "Verified app owned by a team; team owner 18+; team emails verified and 2FA on; app uses slash commands or has been approved for Message Content (ambiguous under 10,000 users where no approval exists); links to a Terms of Service and a Privacy Policy; no harmful language in name, description, commands or metadata; payouts set up; agree to the Monetization Terms (effective June 6, 2024) and the Developer Policy. Max 50 SKUs per app.",
+  "expectedRules": [
+   {
+    "_id": "rule.monetisation-eligibility-checklist",
+    "title": "Premium Apps eligibility: verified app, owned by a team, owner 18+, emails verified and 2FA, slash commands or approved Message Content, ToS and privacy links"
+   },
+   {
+    "_id": "rule.monetisation-requires-slash-or-approved-mc",
+    "title": "Monetisation checklist: app must use slash commands or be approved for Message Content"
+   },
+   {
+    "_id": "rule.intents-under-10k-no-approval-support",
+    "title": "Support: under 10,000 users you use privileged intents without applying, so there is no 'approved' state"
+   },
+   {
+    "_id": "rule.max-50-skus",
+    "title": "Up to 50 SKUs per app"
+   },
+   {
+    "_id": "rule.monetisation-terms-age-18",
+    "title": "Accepting the Monetization Terms requires being at least 18"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "verified": true
+  },
+  "text": "What are the exact eligibility requirements for monetization?",
+  "answer": "**Ruling:** To enable Premium Apps monetisation, your app and team must meet a specific checklist: verified app, team-owned, owner 18+, US/UK/EU based, slash commands (or approved Message Content), ToS and Privacy Policy links, verified emails and 2FA for everyone on the team, clean naming, and payouts configured.\n\n**Why:** Rule `rule.monetisation-eligibility-checklist`, effective from 2026-09-19:\n\n> \"App must be verified\n> App belongs to a developer team\n> Team owner must be at least 18 years old\n> Team must have verified emails and 2FA set up\n> App uses slash commands, or has been approved for the privileged `Message Content` intent\n> App has a link to your Terms of Service\"\n\nSource: [Enabling Monetization](https://docs.discord.com/developers/monetization/enabling-monetization) (developer docs).\n\nThe full checklist, filled out from the knowledge base entry on the same page, also requires:\n- A Privacy Policy link, consistent with your Developer ToS and Developer Policy\n- No harmful language in the app's name, description, commands, or role connection metadata\n- Team owner located in a supported locale: United States, United Kingdom, or the EU\n- Agreement to the Monetization Terms and Monetization Policy\n- Valid payout method configured via Stripe before onboarding completes\n\nRegion rule (`rule.monetisation-regions-docs`, effective 2026-09-19):\n> \"Premium Apps is not currently available outside of these regions. These features will be made available to more regions soon.\"\n\n**Watch out — two live contradictions in the current dataset:**\n\n1. **Message Content clause (C10).** The checklist says \"slash commands, or has been approved for the privileged Message Content intent.\" Since the June 10, 2026 threshold change, \"approval\" for Message Content only exists above 10,000 unique users. A prefix-command bot under 10,000 users has never been through approval, so this clause does not clearly cover it. Resolution on file: *\"Ambiguous, not a hard contradiction... Use slash commands to be safe, or ask developer support before enabling Premium Apps.\"* If your bot relies on Message Content and you're under 10,000 users, that is a real gap — ask support before you build a monetisation flow around it.\n\n2. **$100 payout threshold (C9).** Docs say flatly \"Once your app has made its first $100 it will become eligible for payout\" (developer docs). The support article is more specific: the $100 is **net of payment processing and transaction fees**:\n> \"your team will become eligible for payout review after the first 100 dollars is earned [less applicable payment processing fees and transaction fees].\"\nResolution on file: the support article is the more specific statement of the same rule, not a conflicting one — use the net figure. Source: [Premium Apps Payout](https://support-dev.discord.com/hc/en-us/articles/17299902720919-Premium-Apps-Payout).\n\nAlso note the price-parity rule, effective 2024-10-07 (Developer Policy, highest authority in this stack): if you sell anything off-platform (Patreon, your own site) while your team is in a supported region, you must offer the same at a price no higher on Discord.\n\n**Counsel notes:** Verification and team ownership are prerequisites just to see the onboarding flow, not part of the checklist itself, so get those sorted first or the \"Getting Started\" button won't even appear.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.monetisation\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "monetization/eligibility",
+      "monetization/policy"
+     ]
+    }
+   }
+  ],
+  "seconds": 17.1,
+  "error": null
+ },
+ {
+  "_id": "question.q19",
+  "expectedAnswer": "After the first $100 earned net of payment processing and transaction fees; later cycles pay out amounts above $25, within 45 days after the end of the calendar month; balances under $25 roll over. The developer docs say '$100' without the net qualifier; the support article is the more specific one.",
+  "expectedRules": [
+   {
+    "_id": "rule.payout-threshold-100-net-support",
+    "title": "Support: payout eligibility starts at $100 earned net of processing and transaction fees"
+   },
+   {
+    "_id": "rule.payout-45-days-25-min",
+    "title": "Payouts arrive within 45 days after month end; $25 minimum per cycle, smaller balances roll over"
+   },
+   {
+    "_id": "rule.payout-threshold-100-docs",
+    "title": "Docs: you become eligible for payout after your first $100"
+   }
+  ],
+  "kind": "trap",
+  "note": "Obvious answer: '$100 in sales'. The threshold is net of fees.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "When do I get paid?",
+  "answer": "**Ruling:** Depends on your balance: you get paid within 45 days after the end of the calendar month, but only once you have cleared the eligibility threshold.\n\n**Why:** Two related rules apply, and there is a contradiction between the docs' phrasing and the support article's phrasing (contradictionId C9).\n\nTiming rule, effective from 2025-09-19:\n> \"Eligible payouts will be provided within 45 days after the end of each calendar month. For example, for offerings purchased in January, you will receive payouts within 45 days after January 31st. An eligible payout can be defined as the first $100 earned [less applicable payment processing fees and transaction fees] and for the following billing cycles, in amounts greater than $25.\"\n— [Premium Apps Payout (developer support)](https://support-dev.discord.com/hc/en-us/articles/17299902720919-Premium-Apps-Payout), published 2023-09-05\n\nThreshold conflict:\n- Developer docs (effective from 2026-09-19): \"Once your app has made its first $100 it will become eligible for payout.\" — [Enabling Monetization (developer docs)](https://docs.discord.com/developers/monetization/enabling-monetization)\n- Developer support (effective from 2025-09-19): \"your team will become eligible for payout review after the first 100 dollars is earned [less applicable payment processing fees and transaction fees].\" — [Premium Apps Payout (developer support)](https://support-dev.discord.com/hc/en-us/articles/17299902720919-Premium-Apps-Payout)\n\n**Ruling applied on the conflict:** per the dataset's own resolution note, \"the support article is more specific... the docs sentence is a simplification of the same rule, not a different rule. Answer with the net figure and cite both.\" So treat the $100 as net of payment processing and transaction fees, not gross revenue.\n\n**Watch out:** After that first $100 (net), later cycles only pay out if the balance for that cycle exceeds $25; anything at or below $25 rolls over to the next month rather than paying out.\n\n**Counsel notes:** Don't count your gross sales dashboard number as your payout trigger, Stripe's cut comes off first.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.monetisation\" && (title match \"*pay*\" || quote match \"*payout*\" || quote match \"*45*\" || quote match \"*day*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title,kind,url,publishedAt}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 13.5,
+  "error": null
+ },
+ {
+  "_id": "question.q20",
+  "expectedAnswer": "Get verified first (team owner Stripe ID plus the App Verification checklist), then Developer Portal > Discovery > Discovery Status checklist, fill Discovery Settings, enable, and allow up to 24 hours. Content must suit ages 13+, no graphic or sexual content, and respect the Developer Policy and IP rights.",
+  "expectedRules": [
+   {
+    "_id": "rule.discovery-requires-verification",
+    "title": "Discovery (App Directory) requires the team owner to complete identity and app verification"
+   },
+   {
+    "_id": "rule.discovery-24-hours",
+    "title": "After enabling Discovery it can take up to 24 hours to appear"
+   },
+   {
+    "_id": "rule.app-directory-13-plus",
+    "title": "App Directory content must be appropriate for ages 13+"
+   },
+   {
+    "_id": "rule.verification-owner-stripe-id",
+    "title": "To verify, the team owner must verify their identity through Stripe"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "verified": false
+  },
+  "text": "How do I get into the App Directory?",
+  "answer": "**Ruling:** You need app verification first, then policy compliance and a complete Discovery profile before Discord will list you in the App Directory.\n\n**Why:** Verification is the gate. Per rule `rule.discovery-requires-verification`, effective from 2026-09-19:\n\n> \"To enable **Discovery** for your app, we require your team owner to complete identity and application verification.\"\n— [Enabling Discovery (developer docs)](https://docs.discord.com/developers/discovery/enabling-discovery)\n\nOnce verified, you complete these before \"Enable Discovery\" is clickable:\n\n- **Required documents and policy compliance** — publicly accessible Privacy Policy and Terms of Service, ongoing compliance with Discord's ToS, Community Guidelines, Developer ToS and Developer Policy. Per the App Directory Inclusion Guidelines (developer support, published 2022-09-13, last edited 2025-10-09):\n\n> \"**3. Do not host graphic or sexual content.** Graphic violence, sexual content, or other age-restricted topics are not allowed in public spaces. Apps opting into discoverability should be appropriate for audiences of all ages 13+.\"\n\n- **Required profile fields**: verified status, a Community-type support server, an Application Description, at least 1 tag (up to 5), an install URL (via OAuth2 URL Generator), and the linked Privacy Policy and Terms of Service.\n- Then, in the Developer Portal's Discovery Status tab, click **Enable Discovery**. Per `rule.discovery-24-hours` (effective 2026-09-19):\n\n> \"Once you enable **Discovery**, it may take up to 24 hours for your app to appear in the App Directory and App Launcher.\"\n— [Enabling Discovery (developer docs)](https://docs.discord.com/developers/discovery/enabling-discovery)\n\n**Watch out:** Meeting all requirements does not guarantee inclusion. Discord can remove apps from Discovery later, reactively or proactively, for trust and safety violations — eligibility is checked on an ongoing basis, not just at enrollment.\n\n**Counsel notes:** Get verification and your ToS/Privacy Policy links sorted early; that's the part developers underestimate the timeline on, not the 24-hour propagation.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.appDirectory\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, publishedAt, lastEditedAt}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "app_directory/eligibility",
+      "app_directory/profile_setup"
+     ]
+    }
+   }
+  ],
+  "seconds": 15.9,
+  "error": null
+ },
+ {
+  "_id": "question.q21",
+  "expectedAnswer": "Yes, same thing under two names. The API user flag is 1 << 16 VERIFIED_BOT ('Verified Bot'); 1 << 17 VERIFIED_DEVELOPER is the legacy Early Verified Bot Developer badge. The Active Developer Badge is unrelated and has been decommissioned.",
+  "expectedRules": [
+   {
+    "_id": "rule.verified-bot-flag",
+    "title": "'Verified Bot' badge and 'verified app' are the same thing; the API flag is VERIFIED_BOT (1 << 16)"
+   },
+   {
+    "_id": "rule.active-developer-badge-decommissioned",
+    "title": "The Active Developer Badge no longer exists"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Is the 'Verified Bot' badge the same as 'verified app'?",
+  "answer": "**Ruling:** Yes, they are the same thing. The \"Verified Bot\" badge is simply the visible flag on a bot user whose app has completed App Verification.\n\n**Why:** Per the rules dataset, `effective from 2026-09-19`:\n> `1 << 16` | VERIFIED_BOT | Verified Bot\n\nSource: [User resource (developer docs)](https://docs.discord.com/developers/resources/user).\n\n**Watch out:** Don't confuse it with two other badges: `VERIFIED_DEVELOPER` (1 << 17) is the legacy \"Early Verified Bot Developer\" badge, a different and older thing, and the Active Developer Badge is unrelated and was decommissioned as of 2025-12-05 per developer support. Also note verification itself is now a separate process from privileged intent review (split 2026-06-10) — being verified does not grant intents, and lacking intents doesn't mean you're unverified.\n\n**Counsel notes:** Same badge, different name depending on which doc you're reading — harmless naming inconsistency, not a compliance trap.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.verification\"]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "verification/app_verification"
+     ]
+    }
+   }
+  ],
+  "seconds": 10.0,
+  "error": null
+ },
+ {
+  "_id": "question.q22",
+  "expectedAnswer": "100 global CHAT_INPUT, 15 global USER, 15 global MESSAGE and 1 PRIMARY_ENTRY_POINT command, with the same counts per guild for guild commands; 200 command creates per day per guild. Global commands need the applications.commands scope, which the bot scope includes.",
+  "expectedRules": [
+   {
+    "_id": "rule.command-limits",
+    "title": "Command quotas: 100 global chat input, 15 user, 15 message, 1 entry point; same per guild"
+   },
+   {
+    "_id": "rule.command-create-200-per-day",
+    "title": "200 command creates per day per guild"
+   },
+   {
+    "_id": "rule.applications-commands-scope",
+    "title": "Global slash commands need the applications.commands scope, which the bot scope includes"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "How many slash commands can I register, and how fast?",
+  "answer": "**Ruling:** You can register up to 100 global slash (CHAT_INPUT) commands, 15 user-context and 15 message-context commands, plus 1 primary entry point command (same caps apply per guild for guild-scoped commands), and creating new ones is capped at 200 creates per day per guild.\n\n**Why:** Rules dataset, `effective from 2026-09-19`:\n\n> \"* 100 global `CHAT_INPUT` commands\\n* 15 global `USER` commands\\n* 15 global `MESSAGE` commands\\n* 1 global `PRIMARY_ENTRY_POINT` command\"\n— [Application Commands (developer docs)](https://docs.discord.com/developers/interactions/application-commands)\n\n> \"There is a global rate limit of 200 application command creates per day, per guild\"\n— [Application Commands (developer docs)](https://docs.discord.com/developers/interactions/application-commands)\n\nNo conflicting rules or contradictionId on either entry, so no dispute here.\n\n**Watch out:** The 200/day figure is a *creation* limit, not an invocation limit — editing or deleting existing commands doesn't count against it, but a bulk `PUT` overwrite only counts commands that don't already exist. Hitting the cap returns error code `30034`; hitting the count quota returns `30032`. `PRIMARY_ENTRY_POINT` commands can't be guild-scoped at all.\n\n**Counsel notes:** Register your commands once at startup or on deploy, not on every bot restart, and you will never see either error code.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.rateLimits\") && (title match \"*command*\" || quote match \"*command*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "interactions/commands/structure_and_registration",
+      "rate_limits"
+     ]
+    }
+   }
+  ],
+  "seconds": 12.6,
+  "error": null
+ },
+ {
+  "_id": "question.q23",
+  "expectedAnswer": "No. Community Guidelines rule 14 (effective September 29, 2025) bans self-bots and user-bots, and the support article says automating a user account outside the OAuth2 and bot API can get the account terminated. Use a bot account.",
+  "expectedRules": [
+   {
+    "_id": "rule.self-bots-banned-guidelines",
+    "title": "Self-bots and user-bots are banned by the Community Guidelines (rule 14)"
+   },
+   {
+    "_id": "rule.self-bots-banned-support",
+    "title": "Support: automating a normal user account outside the OAuth2 and bot API can get the account terminated"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Can I run a 'self-bot' or automate my user account for a private tool?",
+  "answer": "**Ruling:** No. Automating your own user account, even privately, is banned outright.\n\n**Why:** Two Discord sources agree on this, no conflict flagged between them.\n\nCommunity Guidelines, effective from 2025-09-29:\n> **14. Do not use self-bots or user-bots.** Each account must be associated with a human, not a bot.\n\n[Discord Community Guidelines](https://discord.com/guidelines)\n\nAlso the developer support article, effective from 2024-04-05:\n> Automating normal user accounts (generally called \"self-bots\") outside of the OAuth2/bot API is forbidden, and can result in an account termination if found.\n\n[Automated User Accounts (Self-Bots)](https://support.discord.com/hc/en-us/articles/115002192352-Automated-User-Accounts-Self-Bots)\n\n**Watch out:** \"Private\" and \"personal use\" don't matter here, the rule is per-account not per-audience. There's no threshold or carve-out for small-scale or personal tools.\n\n**Counsel notes:** Want the same automation, spin up a real bot account and OAuth2 it in, it's the same code either way, just a different door that doesn't get your main account deleted.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (title match \"*self*bot*\" || quote match \"*self-bot*\" || quote match \"*self bot*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "authentication/token_security"
+     ]
+    }
+   }
+  ],
+  "seconds": 10.0,
+  "error": null
+ },
+ {
+  "_id": "question.q24",
+  "expectedAnswer": "Baseline: usernames, avatars, banners, nicknames (the article also lists discriminators, which no longer exist), roles, message metadata such as time sent, voice channel joins and voice state, reactions, and members' language. Content fields are empty without Message Content except for the documented exceptions; join and leave events need Guild Members; status needs Presence.",
+  "expectedRules": [
+   {
+    "_id": "rule.baseline-data-without-intents",
+    "title": "What a bot sees with zero privileged intents: profiles, roles, message metadata, voice state, reactions, locale"
+   },
+   {
+    "_id": "rule.message-content-exceptions-gateway",
+    "title": "Without the intent you still get content for: your own messages, DMs, mentions, and context menu targets"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": []
+  },
+  "text": "What data does my bot get from a server with zero privileged intents?",
+  "answer": "**Ruling:** With zero privileged intents your bot still gets a fixed baseline of member and message metadata, just not message content, presence, or full member-list/join-leave events.\n\n**Why:** `rule.baseline-data-without-intents`, effective from 2024-05-31:\n\n> \"Basic user profile information of server members (e.g., usernames, avatars, banners, discriminators, and nicknames); Roles that members have in the server; Metadata about messages (e.g., day and time sent); The voice channel members join, as well as metadata about voice channels (e.g., muted, deafened, streaming, or have video on); Message reactions by members; and Language information selected by members in their User Settings.\"\n\nSource: [Visibility of Bot Data Access](https://support.discord.com/hc/en-us/articles/7933951485975-Visibility-of-Bot-Data-Access) (user support).\n\n**Watch out:** That article still lists \"discriminators,\" which Discord phased out in 2023, so treat that one field as stale wording rather than a live data point. It's also a support article, lower authority than developer docs, but no dev-docs page conflicts with it on this baseline list, so I'm not flagging a contradiction here, just a staleness caveat. Anything beyond this baseline (message content, individual presence, real-time join/leave events, full member enumeration) needs the matching privileged intent: Message Content, Guild Presences, or Guild Members respectively.\n\n**Counsel notes:** Zero intents does not mean zero data, it means no content, no status, and no crowd control.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.intents\" || area._ref == \"area.dataRetention\") && (title match \"*baseline*\" || title match \"*data*\" || quote match \"*baseline*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "permissions/data_access",
+      "privileged_intents/alternatives"
+     ]
+    }
+   }
+  ],
+  "seconds": 12.5,
+  "error": null
+ },
+ {
+  "_id": "question.q25",
+  "expectedAnswer": "Today: Developer Policy and Developer Terms effective July 8, 2024 (last updated June 6, 2024), arbitration opt out within 30 days of that date or of your first Application. October 1, 2022 to July 7, 2024: the 2022 versions. August 18, 2020 (Terms) and July 1, 2020 (Policy) to September 30, 2022: the 2020 versions. Before that the 2017 Developer Terms (effective August 20, 2017). Discord's Terms, Privacy Policy and Guidelines: effective September 29, 2025.",
+  "expectedRules": [
+   {
+    "_id": "rule.dev-policy-version-2024",
+    "title": "Current Developer Policy: effective July 8, 2024, last updated June 6, 2024"
+   },
+   {
+    "_id": "rule.dev-policy-version-2022",
+    "title": "2022 Developer Policy: effective October 1, 2022, last updated September 1, 2022"
+   },
+   {
+    "_id": "rule.dev-tos-version-2024",
+    "title": "Current Developer Terms of Service: effective July 8, 2024, last updated June 6, 2024"
+   },
+   {
+    "_id": "rule.dev-tos-version-2022",
+    "title": "2022 Developer Terms of Service: effective October 1, 2022"
+   },
+   {
+    "_id": "rule.dev-tos-version-2020",
+    "title": "2020 Developer Terms of Service: effective August 18, 2020"
+   },
+   {
+    "_id": "rule.dev-tos-version-2017",
+    "title": "2017 Developer Terms of Service: effective August 20, 2017"
+   },
+   {
+    "_id": "rule.arbitration-opt-out",
+    "title": "Arbitration opt out: within 30 days of July 8, 2024 or of creating your first Application"
+   },
+   {
+    "_id": "rule.age-13-platform",
+    "title": "You must be at least 13 (or your country's minimum) to use Discord at all"
+   }
+  ],
+  "kind": "standard",
+  "note": null,
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "Which version of the Developer Policy applies to me and when did it change?",
+  "answer": "**Ruling:** As of today, the July 8, 2024 Developer Policy is the one that governs your app.\n\n**Why:** The rule dataset shows the current edition took effect `effective from 2024-07-08`:\n\n> \"Effective date: July 8, 2024\\n\\nLast updated: June 6, 2024\"\n\nSource: [Discord Developer Policy (current, effective July 8, 2024)](https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy)\n\nIt superseded the prior edition, which ran from October 1, 2022 to July 7, 2024:\n\n> \"*Effective: October 1, 2022*\\n\\n*Last Updated: September 1, 2022*\"\n\nSource: [2022 Discord Developer Policy](https://support-dev.discord.com/hc/en-us/articles/25280499088279-2022-Discord-Developer-Policy) (effectiveTo 2024-07-07)\n\nThat 2022 edition itself replaced the 2020 edition (effective from 2020-07-01, superseded 2022-09-30), and no conflicts are flagged between these editions in the dataset, they are a straight chronological chain (each one's `effectiveTo` matches the next one's `effectiveFrom` minus a day).\n\n**Watch out:** The current Terms of Service (effective 2025-09-29) separately confirm that third-party apps must follow \"these Terms, our Community Guidelines, Developer Terms of Service, and Developer Policy\" so the 2024 Developer Policy sits alongside the current Developer ToS, not instead of it. If you're asking about conduct from before July 2024, the earlier version's dates and text apply instead, e.g. the 2022 edition had no AI/ML training prohibition.\n\n**Counsel notes:** If your app trains models on Discord data, that ban is new as of the 2024 edition, don't assume the 2022 text lets you off the hook for pre-2024 conduct either, review both editions if this is a historical dispute.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\" ] | order(effectiveFrom desc) [0...0]"
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (title match \"*Developer Policy*\" || quote match \"*Developer Policy*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, publishedAt, lastEditedAt}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 14.9,
+  "error": null
+ },
+ {
+  "_id": "question.u01",
+  "expectedAnswer": "Unknown. No current source states a server cap for unverified apps. The one page that says verification is required to scale past 100 servers was last edited in August 2024, before the June 2026 change that decoupled verification from intents and unblocked growth during review. The agent should say it cannot determine this and recommend asking Discord developer support, citing both pages.",
+  "expectedRules": [
+   {
+    "_id": "rule.verification-required-past-100-servers",
+    "title": "Support article still says verification is required to scale past 100 servers"
+   },
+   {
+    "_id": "rule.growth-not-blocked-during-review",
+    "title": "Hitting the threshold no longer blocks your app from joining new servers"
+   }
+  ],
+  "kind": "unknown",
+  "note": "The correct behaviour is to admit the gap, not to pick a side.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "servers": 99,
+   "verified": false
+  },
+  "text": "Does an unverified bot still stop at 100 servers?",
+  "answer": "**Ruling:** Depends, and it is genuinely unresolved: no current Discord page confirms a 100-server cap for unverified apps, but no current page retracts it either.\n\n**Why:** Two things got tangled together here that Discord split apart on 2026-06-10: the privileged intent threshold (now 10,000 unique users, not servers) and app verification (which the support article ties to a 100-server growth cap).\n\nThe stale-looking rule, `effective from 2024-08-30`, not superseded:\n> \"Verification is required for your app to scale past 100 servers.\"\n[How Do I Get My App Verified? (developer support)](https://support-dev.discord.com/hc/en-us/articles/23926564536471-How-Do-I-Get-My-App-Verified)\n\nAgainst that, `effective from 2026-06-10`:\n> \"Previously, when an app hit 100 servers and was required to apply for continued access to its Privileged Intents, it was blocked from joining new servers until the review was complete. That's no longer the case. Under the new user-based threshold, apps can continue joining servers and reaching new users while their submission is under review.\"\n[Changes to Privileged Intent Access for Discord Apps (developer support)](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps)\n\nand:\n> \"App Verification also allows you to add monetization features to your app, such as in-app purchases and subscriptions.\"\n[Enabling Discovery (developer docs)](https://docs.discord.com/developers/discovery/enabling-discovery)\n\nThe rules dataset flags these as contradiction `C4` with resolution: \"Unresolved... no current page retracts the 100 server cap for unverified apps either... Our ruling: cite both, say no current source states a cap, and recommend asking developer support.\" I am applying that resolution rather than picking a side myself, because neither page directly overwrites the other on this specific point (server-count cap for *unverified* growth, as opposed to intent review).\n\n**Watch out:** This is separate from privileged intents. Under 10,000 unique users, intents toggle on regardless of verification or server count, per `rule.intent-under-10k-toggle` (effective 2026-06-10). Verification's confirmed current purpose is unlocking Discovery listing and monetisation, not gating raw server growth, but the older support article's 100-server line has never been formally withdrawn.\n\n**Counsel notes:** If you are closing in on 100 servers unverified, don't gamble on a support article Discord forgot to update, file a ticket and get it in writing before you scale.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.verification\" || area._ref == \"area.intents\") && (title match \"*100*\" || title match \"*verif*\" || title match \"*threshold*\" || quote match \"*100 server*\" || quote match \"*10,000*\" || quote match \"*10000*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id,title}, \"source\": source->{title, kind, url, publishedAt, lastEditedAt}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 18.8,
+  "error": null
+ },
+ {
+  "_id": "question.u02",
+  "expectedAnswer": "Unknown. Article 4404772028055 (Message Content Privileged Intent FAQ) was deleted and now redirects to 'What are Privileged Intents?', which says nothing about storage. The Wayback copy was not captured. The agent should say the source no longer exists and fall back to the Developer Terms retention duty (delete when no longer necessary).",
+  "expectedRules": [
+   {
+    "_id": "rule.retention-no-longer-necessary-2024",
+    "title": "How long can I keep API data? Only as long as necessary for your stated functionality; no fixed number"
+   }
+  ],
+  "kind": "unknown",
+  "note": "The agent must not invent FAQ wording.",
+  "situation": {
+   "asOf": "2026-09-19",
+   "intents": [
+    "MESSAGE_CONTENT"
+   ]
+  },
+  "text": "What exactly did the Message Content Intent FAQ say about storing message content?",
+  "answer": "**Ruling:** There is no page in the dataset or knowledge base titled \"Message Content Intent FAQ\", so I cannot quote it. The closest matches are the Gateway docs page and the privileged intent review guide, which do address storing message content.\n\n**Why:** No source document with that title exists in either the rules dataset or the knowledge base (checked by title match for \"FAQ\" and \"Message Content\" — zero results). The nearest substantive rule on storing message content, `effective from 2026-06-10`, comes from the intent review guide:\n\n> \"If you're storing the data, explain why it's necessary and describe your retention policy and security measures. If you're processing it in memory and discarding it, say so.\"\n\nSource: [Getting Started with Privileged Intent Review (developer docs)](https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review)\n\nThere is also the general retention rule from the Developer Terms of Service, `effective from 2024-07-08`, which applies to any API data including message content:\n\n> \"you will (1) promptly update the API Data upon request from us or the applicable user, and (2) promptly delete the API Data when: (a) retaining it is no longer necessary for your Application's stated (and approved through App Review, as applicable) functionality that is permitted under the Terms...\"\n\nSource: [Discord Developer Terms of Service (current, effective July 8, 2024)](https://support-dev.discord.com/hc/en-us/articles/8562894815383-Discord-Developer-Terms-of-Service)\n\n**Watch out:** No Discord document sets a fixed retention period for message content (the 2017 Terms had a 7-day rule but that expired August 17, 2020). If you meant a different page — for example the gateway page's exceptions list or the \"You Might Not Need a Privileged Intent\" guide — tell me and I will pull the exact quote from that one instead.\n\n**Counsel notes:** If someone told you there is a \"Message Content Intent FAQ,\" get me the URL, because it is not in anything I can search.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && (area._ref == \"area.dataRetention\" || quote match \"*message content*\" || title match \"*Message Content*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"conflicts\": conflictsWith[]->{_id, title}, \"source\": source->{title, kind, url, publishedAt, lastEditedAt}} | order(effectiveFrom desc)"
+    }
+   },
+   {
+    "tool": "knowledge_base_read",
+    "input": {
+     "knowledgeBase": "kbyycNCGyegi",
+     "paths": [
+      "data_handling/retention_and_privacy",
+      "privileged_intents/alternatives"
+     ]
+    }
+   },
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"source\" && (title match \"*FAQ*\" || title match \"*Message Content*\")]{_id, title, kind, url, publishedAt, lastEditedAt}"
+    }
+   }
+  ],
+  "seconds": 22.1,
+  "error": null
+ },
+ {
+  "_id": "question.u03",
+  "expectedAnswer": "Best answer: June 10, 2026, from the change log and the review guide. But the announcement page itself is undated (it says 'today'), its metadata says created May 6, 2026 and edited June 11, 2026. The agent should give June 10, 2026 with the caveat that the primary source carries no date.",
+  "expectedRules": [
+   {
+    "_id": "rule.intent-change-date-changelog",
+    "title": "The intent change is dated June 10, 2026 in the change log"
+   },
+   {
+    "_id": "rule.intent-change-date-guide",
+    "title": "The review guide says the changes took effect as of June 10th, 2026"
+   },
+   {
+    "_id": "rule.intent-change-date-announcement-undated",
+    "title": "The announcement says 'today' but carries no date"
+   }
+  ],
+  "kind": "unknown",
+  "note": "Partial knowledge: a defensible date with an explicit caveat, not a confident single answer.",
+  "situation": {
+   "asOf": "2026-09-19"
+  },
+  "text": "What is the exact date the 10,000-user rule started?",
+  "answer": "**Ruling:** The 10,000-unique-user threshold took effect on June 10, 2026.\n\n**Why:** Per the rule \"Discord's announcement: the threshold is now user count, not server count\", `effective from 2026-06-10`:\n\n> Starting today, the threshold is based on the number of users your app can access across all the servers it belongs to. If your app has fewer than 10,000 users, you can continue accessing Privileged Intents by toggling them on in the Developer Portal. Once your app reaches 10,000 users, you'll need to apply for Privileged Intent access.\n\nSource: [Changes to Privileged Intent Access for Discord Apps (developer support)](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps), published 2026-05-06, last edited 2026-06-11.\n\nThe Gateway developer docs page confirms the same date and figure, `effective from 2026-06-10`:\n\n> When an app has more than 10,000 unique users who can see your app across all the servers it's in, it requires review for continued access to Privileged Intents.\n\nSource: [Gateway (developer docs)](https://docs.discord.com/developers/events/gateway)\n\n**Watch out:** Some older pages on the same docs site (an application flags table, and an \"approved for\" checklist on a 2022-dated support article) still describe the pre-June-2026 100-server rule. Per the dataset's resolution note, the June 10, 2026 change log and gateway page control; the stale server-count language should be ignored going forward.\n\n**Counsel notes:** If a developer shows you a page mentioning \"100 servers\" today, assume it just hasn't been updated yet, not that the rule reverted.",
+  "tools": [
+   {
+    "tool": "groq_query",
+    "input": {
+     "query": "*[_type == \"rule\" && area._ref == \"area.intents\" && (quote match \"*10,000*\" || quote match \"*10000*\" || title match \"*threshold*\" || title match \"*unique*\")]{_id, title, plainAnswer, quote, appliesWhen, effectiveFrom, effectiveTo, contradictionId, resolution, \"source\": source->{title, url, publishedAt, lastEditedAt}} | order(effectiveFrom desc)"
+    }
+   }
+  ],
+  "seconds": 10.4,
+  "error": null
+ }
+]
