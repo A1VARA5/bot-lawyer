@@ -1,4 +1,5 @@
-// Registers the /ask slash command. Guild scoped so it appears instantly in Aivaras's server.
+// Registers the /ask slash command globally (any server that installs the app; can take up to an hour to appear)
+// and in Aivaras's guild (instant).
 // Usage: node --env-file=.env.local scripts/register-commands.mjs
 const appId = process.env.DISCORD_APPLICATION_ID
 const token = process.env.DISCORD_BOT_TOKEN
@@ -16,9 +17,15 @@ const commands = [
   },
 ]
 
-const res = await fetch(`https://discord.com/api/v10/applications/${appId}/guilds/${guild}/commands`, {
-  method: 'PUT',
-  headers: {Authorization: `Bot ${token}`, 'Content-Type': 'application/json'},
-  body: JSON.stringify(commands),
-})
-console.log(res.status, (await res.json()).map?.((c) => c.name) ?? (await res.text()))
+for (const url of [
+  `https://discord.com/api/v10/applications/${appId}/commands`,
+  `https://discord.com/api/v10/applications/${appId}/guilds/${guild}/commands`,
+]) {
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {Authorization: `Bot ${token}`, 'Content-Type': 'application/json'},
+    body: JSON.stringify(commands),
+  })
+  const body = await res.json()
+  console.log(res.status, url.includes('/guilds/') ? 'guild' : 'global', Array.isArray(body) ? body.map((c) => c.name) : body)
+}
