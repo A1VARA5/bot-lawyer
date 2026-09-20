@@ -110,7 +110,7 @@ node --env-file=.env.local scripts/register-commands.mjs   # /ask in your guild
 
 ## Credits
 
-Built with Claude Code. I direct, the tools build: four research agents, a seeding agent, a formatting agent, two graders, a test pass agent. Two endpoints, merged tools and inlined initial context follow the Sanity Labs agent workshop. The content is Discord's own docs, support articles, policies, change log and GitHub issues.
+Built by Aivaras Navardauskas for the DEV Sanity Challenge, with Claude Code as the editor. Two endpoints, merged tools and inlined initial context follow the Sanity Labs agent workshop. The content is Discord's own docs, support articles, policies, change log and GitHub issues.
 
 ## License
 
