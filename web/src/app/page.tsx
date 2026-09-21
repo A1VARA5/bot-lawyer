@@ -5,7 +5,7 @@ import {DefaultChatTransport} from 'ai'
 import {useEffect, useRef, useState} from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import {RulesOnFile, extractRules} from './rules-on-file'
+import {PagesRead, RulesOnFile, extractPages, extractRules} from './rules-on-file'
 import {fixDraftLength} from '@/lib/draft'
 
 // Belt and braces: the prompt forbids dashes and asks for a blank line before Source; the model sometimes forgets.
@@ -20,7 +20,8 @@ const EXAMPLES = [
   'Is retry_after in seconds or milliseconds? I keep getting 429s.',
   'Does an unverified bot still stop at 100 servers?',
   'Can I transfer my verified app to my cofounder?',
-  'Can we train a model on messages our bot sees?',
+  'What does the Developer Policy actually say about how long we can keep message content, and how did the 2020 version word it?',
+  'Walk me through the payout timing on the Premium Apps page: when it runs, the minimum, the dispute window.',
   'We are a team in Germany, unverified, 800 users. Can we sell a premium subscription in our bot?',
   'Write a welcome message for my gaming server with a big header, three rules as a list, and a spoiler at the end',
 ]
@@ -240,6 +241,11 @@ export default function Home() {
                         </div>
                         <div className="mt-2 text-[11px] text-muted">Bot Lawyer · sources snapshotted 2026-09-19 · content in Sanity, served by Sanity Context</div>
                       </div>
+                    )}
+                    {isBot && full && (
+                      <PagesRead
+                        pages={toolParts.filter((p) => toolName(p) === 'knowledge_base_read').flatMap((p) => extractPages(p.input, p.output))}
+                      />
                     )}
                     {isBot && full && (
                       <RulesOnFile
